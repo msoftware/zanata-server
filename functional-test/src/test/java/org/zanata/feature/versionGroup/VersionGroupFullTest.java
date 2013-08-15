@@ -20,11 +20,9 @@
  */
 package org.zanata.feature.versionGroup;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.zanata.feature.BasicAcceptanceTest;
@@ -33,8 +31,10 @@ import org.zanata.page.groups.CreateVersionGroupPage;
 import org.zanata.page.groups.VersionGroupPage;
 import org.zanata.page.groups.VersionGroupsPage;
 import org.zanata.page.utility.DashboardPage;
-import org.zanata.util.ResetDatabaseRule;
+import org.zanata.util.AddUsersRule;
 import org.zanata.workflow.LoginWorkFlow;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Damian Jansen <a
@@ -42,8 +42,8 @@ import org.zanata.workflow.LoginWorkFlow;
  */
 @Category(DetailedTest.class)
 public class VersionGroupFullTest {
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+    @Rule
+    public AddUsersRule addUsersRule = new AddUsersRule();
     private DashboardPage dashboardPage;
 
     @Before
@@ -82,13 +82,13 @@ public class VersionGroupFullTest {
         CreateVersionGroupPage groupPage =
                 dashboardPage.goToGroups().createNewGroup().saveGroupFailure();
         assertThat("The two errors are value is required",
-                groupPage.getErrors(), Matchers.contains(errorMsg, errorMsg));
+            groupPage.getErrors(), Matchers.contains(errorMsg, errorMsg));
 
         groupPage =
                 groupPage.clearFields().inputGroupName(groupName)
                         .saveGroupFailure();
         assertThat("The value required error shown", groupPage.getErrors(),
-                Matchers.contains(errorMsg));
+            Matchers.contains(errorMsg));
 
         groupPage =
                 groupPage.clearFields().inputGroupId(groupID)

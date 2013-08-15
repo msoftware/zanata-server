@@ -23,8 +23,8 @@ package org.zanata.feature.versionGroup;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hamcrest.Matchers;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.experimental.categories.Category;
 import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.Theories;
@@ -32,7 +32,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.zanata.feature.DetailedTest;
 import org.zanata.page.groups.CreateVersionGroupPage;
-import org.zanata.util.ResetDatabaseRule;
+import org.zanata.util.AddUsersRule;
 import org.zanata.workflow.LoginWorkFlow;
 
 /**
@@ -43,8 +43,8 @@ import org.zanata.workflow.LoginWorkFlow;
 @Category(DetailedTest.class)
 public class VersionGroupIDValidationTest {
 
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+    @Rule
+    public AddUsersRule addUsersRule = new AddUsersRule();
 
     @DataPoint
     public static String INVALID_CHARACTER_PIPE = "Group|ID";
@@ -94,12 +94,15 @@ public class VersionGroupIDValidationTest {
     public static String MUST_END_ALPHANUMERIC = "GroupID-";
     private static CreateVersionGroupPage groupPage;
 
-    @BeforeClass
-    public static void beforeClass() {
-        groupPage = new LoginWorkFlow()
-                .signIn("admin", "admin")
-                .goToGroups()
-                .createNewGroup();
+    @Before
+    public void goToGroupPage() {
+        if (groupPage == null) {
+            groupPage =
+                    new LoginWorkFlow()
+                        .signIn("admin", "admin")
+                        .goToGroups()
+                        .createNewGroup();
+        }
     }
 
     @Theory
