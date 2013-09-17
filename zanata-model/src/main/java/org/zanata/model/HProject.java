@@ -69,7 +69,7 @@ import org.zanata.rest.dto.Project;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @TypeDef(name = "entityStatus", typeClass = EntityStatusType.class)
 @Restrict
-@EntityRestrict({INSERT, UPDATE, DELETE})
+//@EntityRestrict({INSERT, UPDATE, DELETE})
 @Setter
 @Indexed
 @ToString(callSuper = true, of = "name")

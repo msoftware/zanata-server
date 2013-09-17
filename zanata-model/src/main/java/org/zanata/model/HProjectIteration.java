@@ -83,7 +83,7 @@ import com.google.common.collect.ImmutableList;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @TypeDef(name = "entityStatus", typeClass = EntityStatusType.class)
 @Restrict
-@EntityRestrict({INSERT, UPDATE, DELETE})
+//@EntityRestrict({INSERT, UPDATE, DELETE})
 @Indexed
 @Setter
 @NoArgsConstructor
