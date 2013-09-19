@@ -100,27 +100,7 @@
       </rich:panel>
     </h:form>
 
-    <rich:popupPanel id="termsOfUse" width="640" height="480" rendered="#{not identity.loggedIn and applicationConfiguration.internalAuth}" >
-      <f:facet name="header">
-        <h:panelGroup>
-          <h:outputText value="#{messages['jsf.TermsOfUse']}"/>
-        </h:panelGroup>
-      </f:facet>
-      <f:facet name="controls">
-        <h:panelGroup>
-          <h:graphicImage value="../images/close.gif" styleClass="hidelink" id="hideTermsLink">
-            <rich:componentControl operation="hide" event="click" target="hideTermsLink"/>
-          </h:graphicImage>
-        </h:panelGroup>
-      </f:facet>
-      <ui:include src="/legal.html"/>
-      <h:panelGroup style="width: 600px; text-align: center;">
-        <h:form>
-          <richext:spacer height="40"/>
-          <a4j:commandButton value="#{messages['jsf.Close']}" onclick="#{rich:component('termsOfUse')}.hide()"/>
-        </h:form>
-      </h:panelGroup>
-    </rich:popupPanel>
+    <ui:include src="/WEB-INF/layout/terms_and_condition.xhtml"/>
 
     <rich:panel rendered="#{not applicationConfiguration.internalAuth}">
           <h:outputText value="#{messages['jsf.PleaseContactAdministrationToGetRegistrationLink']}"/>

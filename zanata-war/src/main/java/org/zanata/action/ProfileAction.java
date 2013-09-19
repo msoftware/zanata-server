@@ -51,20 +51,42 @@ import org.zanata.security.ZanataOpenId;
 import org.zanata.service.RegisterService;
 import org.zanata.service.impl.EmailChangeService;
 
+import lombok.*;
+
 @Name("profileAction")
 @Scope(ScopeType.PAGE)
 public class ProfileAction implements Serializable
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 1L;
+
+   @NotEmpty
+   @Size(min = 2, max = 80)
+   @Getter
+   @Setter
    private String name;
+
+   @Email
+   @Getter
    private String email;
+
+   @NotEmpty
+   @Size(min = 3, max = 20)
+   @Pattern(regexp = "^[a-z\\d_]{3,20}$", message = "{validation.username.constraints}")
+   @Getter
    private String username;
+
+   @Getter
+   @Setter
    private String activationKey;
+
+   @Getter
    private boolean valid;
+
    private boolean newUser;
+
+   @Getter
+   @Setter
+   private boolean agreedToTermsOfUse;
 
    @In
    ApplicationConfiguration applicationConfiguration;
@@ -121,6 +143,15 @@ public class ProfileAction implements Serializable
       }
    }
 
+   private void validateTermsOfUse()
+   {
+      if (isNewUser() && !isAgreedToTermsOfUse())
+      {
+         valid = false;
+         FacesMessages.instance().addToControl("agreedToTerms", "You must accept the Terms of Use");
+      }
+   }
+
    @Create
    public void onCreate()
    {
@@ -159,52 +190,16 @@ public class ProfileAction implements Serializable
       }
    }
 
-   @NotEmpty
-   @Size(min = 2, max = 80)
-   public String getName()
-   {
-      return name;
-   }
-
-   public void setName(String name)
-   {
-      this.name = name;
-   }
-
-   @Email
-   public String getEmail()
-   {
-      return email;
-   }
-
    public void setEmail(String email)
    {
-      this.validateEmail(email);
+      validateEmail(email);
       this.email = email;
-   }
-
-   @NotEmpty
-   @Size(min = 3, max = 20)
-   @Pattern(regexp = "^[a-z\\d_]{3,20}$", message = "{validation.username.constraints}")
-   public String getUsername()
-   {
-      return username;
    }
 
    public void setUsername(String username)
    {
-      this.username = username;
       validateUsername(username);
-   }
-
-   public String getActivationKey()
-   {
-      return activationKey;
-   }
-
-   public void setActivationKey(String keyHash)
-   {
-      this.activationKey = keyHash;
+      this.username = username;
    }
 
    @Transactional
@@ -213,6 +208,7 @@ public class ProfileAction implements Serializable
       this.valid = true;
       validateEmail(this.email);
       validateUsername(username);
+      validateTermsOfUse();
 
       if( !this.isValid() )
       {
@@ -238,7 +234,6 @@ public class ProfileAction implements Serializable
       }
       else
       {
-
          String key;
          if (identity.getCredentials().getAuthType() == AuthenticationType.KERBEROS || identity.getCredentials().getAuthType() == AuthenticationType.JAAS)
          {
@@ -264,11 +259,6 @@ public class ProfileAction implements Serializable
          return "home";
       }
       return "view";
-   }
-
-   public boolean isValid()
-   {
-      return valid;
    }
 
    public boolean isNewUser()
