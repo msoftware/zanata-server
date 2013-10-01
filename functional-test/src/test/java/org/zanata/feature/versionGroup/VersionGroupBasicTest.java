@@ -100,7 +100,7 @@ public class VersionGroupBasicTest {
 
     /**
      * This assumes there will be ONE error on screen.
-     * 
+     *
      * @param createVersionGroupPage
      *            page
      * @return the error
