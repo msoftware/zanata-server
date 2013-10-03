@@ -73,10 +73,6 @@ public class NotificationView extends Composite implements NotificationDisplay {
 
         String messagePanel();
 
-        String mainPanel();
-
-        String link();
-
         String msgLabel();
 
         String disabledInlineLink();

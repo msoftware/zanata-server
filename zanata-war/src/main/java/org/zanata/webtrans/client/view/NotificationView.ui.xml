@@ -6,12 +6,6 @@
     type="org.zanata.webtrans.client.resources.Resources" />
 
   <ui:style type="org.zanata.webtrans.client.view.NotificationView.Styles">
-    .mainPanel {
-      margin: 2px 0px;
-      width: 100%;
-      height: 100%;
-    }
-
     .messagePanel {
       padding: 3px;
       width: 100%;
@@ -31,13 +25,6 @@
 
     .messageRow tr:last-child {
       background: none;
-    }
-
-    .link, .link:hover, .link:visited {
-      color: #FFFFFF;
-      padding: 5px;
-      outline: none;
-      opacity: 0.8;
     }
 
     .inlineLink, .inlineLink:hover, .inlineLink:visited {
@@ -75,18 +62,14 @@
 
   </ui:style>
 
-  <g:LayoutPanel styleName="{style.mainPanel}">
-    <g:layer top="0px" bottom="24px">
-      <g:ScrollPanel ui:field="scrollPanel">
-        <g:VerticalPanel ui:field="messagePanel"
-          styleName="{style.messagePanel}" />
-      </g:ScrollPanel>
-    </g:layer>
-    <g:layer bottom="2px" height="24px">
-      <g:Anchor href="javascript:void(0)" ui:field="clearLink"
-        addStyleNames="{style.link}">
-        <ui:msg>Clear</ui:msg>
-      </g:Anchor>
-    </g:layer>
-  </g:LayoutPanel>
+  <g:HTMLPanel styleName="new-zanata">
+    <g:ScrollPanel ui:field="scrollPanel">
+      <g:VerticalPanel ui:field="messagePanel"
+        styleName="{style.messagePanel}" />
+    </g:ScrollPanel>
+
+    <g:Anchor href="javascript:void(0)" ui:field="clearLink">
+      <ui:msg>Clear</ui:msg>
+    </g:Anchor>
+  </g:HTMLPanel>
 </ui:UiBinder>
