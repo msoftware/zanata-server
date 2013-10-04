@@ -29,6 +29,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.zanata.feature.DetailedTest;
+import org.zanata.feature.FunctionalTest;
 import org.zanata.page.account.RegisterPage;
 import org.zanata.util.ResetDatabaseRule;
 import org.zanata.util.rfc2822.ValidEmailAddressRFC2822;
@@ -43,10 +44,7 @@ import static org.zanata.util.rfc2822.ValidEmailAddressRFC2822.*;
  */
 @RunWith(Theories.class)
 @Category(DetailedTest.class)
-public class ValidEmailAddressTest {
-
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+public class ValidEmailAddressTest extends FunctionalTest {
 
     @DataPoint
     public static ValidEmailAddressRFC2822 TEST_BASIC_EMAIL = BASIC_EMAIL;

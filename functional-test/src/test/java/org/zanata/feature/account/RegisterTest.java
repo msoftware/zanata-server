@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.zanata.feature.BasicAcceptanceTest;
 import org.zanata.feature.DetailedTest;
+import org.zanata.feature.FunctionalTest;
 import org.zanata.page.account.RegisterPage;
 import org.zanata.page.utility.HomePage;
 import org.zanata.util.ResetDatabaseRule;
@@ -44,9 +45,7 @@ import org.zanata.workflow.BasicWorkFlow;
  *         href="mailto:djansen@redhat.com">djansen@redhat.com</a>
  */
 @Category(DetailedTest.class)
-public class RegisterTest {
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+public class RegisterTest extends FunctionalTest {
 
     Map<String, String> fields;
     private HomePage homePage;

@@ -31,6 +31,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.zanata.feature.DetailedTest;
+import org.zanata.feature.FunctionalTest;
 import org.zanata.page.groups.CreateVersionGroupPage;
 import org.zanata.util.ResetDatabaseRule;
 import org.zanata.workflow.LoginWorkFlow;
@@ -41,10 +42,7 @@ import org.zanata.workflow.LoginWorkFlow;
  */
 @RunWith(Theories.class)
 @Category(DetailedTest.class)
-public class VersionGroupIDValidationTest {
-
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+public class VersionGroupIDValidationTest extends FunctionalTest {
 
     @DataPoint
     public static String INVALID_CHARACTER_PIPE = "Group|ID";

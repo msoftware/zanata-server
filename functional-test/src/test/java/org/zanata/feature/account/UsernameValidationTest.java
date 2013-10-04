@@ -29,6 +29,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.zanata.feature.DetailedTest;
+import org.zanata.feature.FunctionalTest;
 import org.zanata.page.account.RegisterPage;
 import org.zanata.util.ResetDatabaseRule;
 import org.zanata.workflow.BasicWorkFlow;
@@ -41,9 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @RunWith(Theories.class)
 @Category(DetailedTest.class)
-public class UsernameValidationTest {
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+public class UsernameValidationTest extends FunctionalTest {
 
     @DataPoint
     public static String INVALID_PIPE = "user|name";

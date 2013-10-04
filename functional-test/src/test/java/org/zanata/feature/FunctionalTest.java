@@ -18,48 +18,48 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
  * site: http://www.fsf.org.
  */
-package org.zanata.feature.administration;
+package org.zanata.feature;
 
-import org.junit.*;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.experimental.categories.Category;
-import org.zanata.feature.DetailedTest;
-import org.zanata.feature.FunctionalTest;
-import org.zanata.page.utility.DashboardPage;
-import org.zanata.page.administration.ManageUserPage;
-import org.zanata.page.administration.ManageUserAccountPage;
+import org.junit.rules.TestName;
+import org.zanata.page.WebDriverFactory;
+import org.zanata.page.utility.HomePage;
 import org.zanata.util.ResetDatabaseRule;
-import org.zanata.workflow.LoginWorkFlow;
-import org.hamcrest.Matchers;
+import org.zanata.workflow.AbstractWebWorkFlow;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.util.Date;
 
 /**
  * @author Damian Jansen <a
  *         href="mailto:djansen@redhat.com">djansen@redhat.com</a>
  */
+@Slf4j
 @Category(DetailedTest.class)
-public class ManageUsersFullTest extends FunctionalTest {
+public class FunctionalTest {
 
-    private DashboardPage dashboardPage;
+    @ClassRule
+    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+
+    @Rule
+    public TestName name = new TestName();
 
     @Before
-    public void before() {
-        dashboardPage = new LoginWorkFlow().signIn("admin", "admin");
+    public void setupTestFunction() {
+        WebDriverFactory.INSTANCE.getDriver();
+        updateTestId();
+        String date = new Date().toString();
+        log.info("[TEST] {}:{}:{}", getClass().getName(), name.getMethodName(), date);
     }
 
-    @Test
-    public void changeAUsersUsername() {
-        String username = "administratornamechange";
-        ManageUserPage manageUserPage =
-                dashboardPage.goToAdministration().goToManageUserPage();
-
-        ManageUserAccountPage manageUserAccountPage =
-                manageUserPage.editUserAccount("admin");
-        manageUserPage =
-                manageUserAccountPage.clearFields().enterUsername(username)
-                        .saveUser();
-        assertThat("Administrator is displayed", manageUserPage.getUserList(),
-                Matchers.hasItem(username));
+    private void updateTestId() {
+        String testId = getClass().getName();
+        testId = testId.substring(testId.lastIndexOf(".")+1)
+            .concat(":").concat(name.getMethodName());
+        WebDriverFactory.INSTANCE.updateListenerTestName(testId);
     }
-
 }

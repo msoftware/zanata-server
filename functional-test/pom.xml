@@ -57,7 +57,7 @@
     <webdriver.type>chrome</webdriver.type>
     <webdriver.display>:0</webdriver.display>
     <webdriver.log>${project.build.directory}/webdriver.log</webdriver.log>
-
+    <webdriver.screenshot.dir>${project.build.directory}/screenshots</webdriver.screenshot.dir>
     <!-- this is the path we store H2 backup script which will be used to reset database state -->
     <zanata.database.backup>${project.build.directory}/zanata.database.backup.sql</zanata.database.backup>
 
@@ -445,6 +445,7 @@
                 <echo>-Dwebdriver.display=display to run test browser in, for Xnest or otherwise. Default is :0.</echo>
                 <echo>-Dwebdriver.chrome.bin=full path to chrome binary.</echo>
                 <echo>-Dwebdriver.chrome.driver=full path to chromedriver binary.</echo>
+                <echo>-Dwebdriver.screenshot.dir=full path to location for saving screenshots. Default is ${project.build.directory}/screenshots</echo>
                 <echo>==========================================================</echo>
               </target>
             </configuration>

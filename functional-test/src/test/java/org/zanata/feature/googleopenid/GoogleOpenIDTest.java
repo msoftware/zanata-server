@@ -32,6 +32,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.zanata.feature.DetailedTest;
+import org.zanata.feature.FunctionalTest;
 import org.zanata.page.googleaccount.GoogleAccountPage;
 import org.zanata.page.googleaccount.GoogleManagePermissionsPage;
 import org.zanata.page.utility.HomePage;
@@ -45,10 +46,7 @@ import org.zanata.workflow.RegisterWorkFlow;
  *         href="mailto:djansen@redhat.com">djansen@redhat.com</a>
  */
 @Category(DetailedTest.class)
-public class GoogleOpenIDTest {
-
-    @ClassRule
-    public static ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
+public class GoogleOpenIDTest extends FunctionalTest {
 
     private String googleUsername1 = "zanata.test.1";
     private String googlePassword1;
