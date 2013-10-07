@@ -114,7 +114,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0.1</version>
     </dependency>
 
     <dependency>
@@ -203,7 +202,7 @@
     <dependency>
       <groupId>com.github.huangp</groupId>
       <artifactId>entityunit</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
       <scope>test</scope>
     </dependency>
 
