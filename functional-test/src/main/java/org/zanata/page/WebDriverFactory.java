@@ -135,8 +135,7 @@ public enum WebDriverFactory {
 
         WebDriver webDriver =
             new RemoteWebDriver(driverService.getUrl(), capabilities);
-        if (System.getProperty("webdriver.screenshot.dir")
-            != null) {
+        if (System.getProperty("webdriver.screenshot.dir") != null) {
             webDriver = enableScreenshots(webDriver);
         }
         return webDriver;
