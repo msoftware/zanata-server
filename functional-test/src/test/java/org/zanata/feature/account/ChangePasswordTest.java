@@ -48,7 +48,7 @@ public class ChangePasswordTest {
     // Override database class rule
     @Rule
     public ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
-    
+
     @Rule
     public TakeScreenshotRule screenshotRule =
             new TakeScreenshotRule();
