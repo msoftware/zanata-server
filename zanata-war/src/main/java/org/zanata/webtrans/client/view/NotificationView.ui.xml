@@ -1,75 +1,31 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:fui="urn:import:org.zanata.webtrans.client.ui"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
   <ui:with field="resources"
     type="org.zanata.webtrans.client.resources.Resources" />
 
-  <ui:style type="org.zanata.webtrans.client.view.NotificationView.Styles">
-    .messagePanel {
-      padding: 3px;
-      width: 100%;
+  <ui:style>
+    .container {
+      height: 100%;
+      overflow: auto;
     }
 
-    .messagePanel tr:hover {
-      background: #282828;
-    }
-
-    .messageRow {
-      border-bottom: 1px dotted #FFFFFF;
-    }
-
-    .messageRow tr:first-child {
-      background: none;
-    }
-
-    .messageRow tr:last-child {
-      background: none;
-    }
-
-    .inlineLink, .inlineLink:hover, .inlineLink:visited {
-      text-decoration: underline;
-      cursor: pointer;
-      color: #ffa500;
-      font-size: 0.9em;
-      font-weight: bold;
-    }
-
-    .disabledInlineLink, .disabledInlineLink:hover, .disabledInlineLink:visited {
-      color: #FF4500;
-      font-size: 0.8em;
-      font-weight: bold;
-      opacity: 0.6;
-      cursor: text;
-    }
-
-    .timeLabel {
-      font-size: 0.7em;
-      color: #ffa500;
-      font-weight: bold;
-    }
-
-    .msgLabel {
-      padding-left: 3px;
-      word-wrap: break-word;
-      color: #DBDBDB;
-      font-size: 12px;
-    }
-
-    .severity {
-      font-size: 13px;
+    .messagePanel>li:hover {
+      background-color: rgba(255, 255, 255, 0.05);
     }
 
   </ui:style>
 
-  <g:HTMLPanel styleName="new-zanata">
-    <g:ScrollPanel ui:field="scrollPanel">
-      <g:VerticalPanel ui:field="messagePanel"
-        styleName="{style.messagePanel}" />
-    </g:ScrollPanel>
-
-    <g:Anchor href="javascript:void(0)" ui:field="clearLink">
+  <g:HTMLPanel styleName="new-zanata {style.container}">
+    <fui:UnorderedListWidget ui:field="messagePanel"
+      styleName="list--no-bullets list--slat {style.messagePanel}" />
+    <g:Anchor href="javascript:void(0)"
+      styleName="l--float-right l--push-all-quarter"
+      ui:field="clearLink">
       <ui:msg>Clear</ui:msg>
     </g:Anchor>
+
   </g:HTMLPanel>
 </ui:UiBinder>

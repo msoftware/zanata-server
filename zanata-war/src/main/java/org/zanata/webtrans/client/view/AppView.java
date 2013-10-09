@@ -322,7 +322,7 @@ public class AppView extends Composite implements AppDisplay,
 
     public void showNotification(NotificationEvent notification) {
         notifications.clear();
-        notifications.add(new NotificationItem(messages, notification, this));
+        notifications.add(new NotificationItem(messages, notification, this, false));
     }
 
     @Override

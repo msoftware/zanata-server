@@ -1,5 +1,7 @@
 package org.zanata.webtrans.client.view;
 
+import static org.zanata.webtrans.shared.model.TransMemoryResultItem.MatchType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import org.zanata.webtrans.client.ui.TextContentsDisplay;
 import org.zanata.webtrans.shared.model.DiffMode;
 import org.zanata.webtrans.shared.model.TransMemoryResultItem;
 import org.zanata.webtrans.shared.rpc.HasSearchType.SearchType;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -33,19 +36,17 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
-import static org.zanata.webtrans.shared.model.TransMemoryResultItem.MatchType;
 
 public class TransMemoryView extends Composite implements
         TranslationMemoryDisplay {
@@ -58,14 +59,6 @@ public class TransMemoryView extends Composite implements
     }
 
     interface Styles extends CssResource {
-        String headerLabel();
-
-        String rootContainer();
-
-        String searchBox();
-
-        String topBar();
-
         String translated();
 
         String approved();
@@ -77,9 +70,6 @@ public class TransMemoryView extends Composite implements
     @UiField
     TextBox tmTextBox;
 
-    @UiField
-    Label headerLabel;
-
     @UiField(provided = true)
     ValueListBox<SearchType> searchType;
 
@@ -87,15 +77,20 @@ public class TransMemoryView extends Composite implements
     Button clearButton, mergeTMButton, searchButton;
 
     @UiField
-    ScrollPanel container;
+    HTMLPanel container;
+
     @UiField
     RadioButton diffModeDiff;
+
     @UiField
     RadioButton diffModeHighlight;
 
+    @UiField
+    UiMessages messages;
+
     private final FlexTable resultTable;
     private final Label loadingLabel, noResultFoundLabel;
-    private final UiMessages messages;
+
     private final DiffColorLegendPanel diffLegendPanel;
 
     private TranslationMemoryDisplay.Listener listener;
@@ -108,11 +103,15 @@ public class TransMemoryView extends Composite implements
     private final static int ORIGIN_COL = 5;
 
     @Inject
-    public TransMemoryView(final UiMessages messages,
-            SearchTypeRenderer searchTypeRenderer,
+    public TransMemoryView(SearchTypeRenderer searchTypeRenderer,
             final DiffColorLegendPanel diffLegendPanel) {
-        this.messages = messages;
         this.diffLegendPanel = diffLegendPanel;
+
+        searchType =
+                new EnumListBox<SearchType>(SearchType.class,
+                        searchTypeRenderer);
+
+        initWidget(uiBinder.createAndBindUi(this));
 
         resultTable = new FlexTable();
         resultTable.setStyleName("resultTable");
@@ -156,22 +155,11 @@ public class TransMemoryView extends Composite implements
         resultTable.setWidget(0, ORIGIN_COL, new Label(messages.originLabel()));
 
         loadingLabel = new Label(messages.searching());
-        loadingLabel.setStyleName("tableMsg");
+        loadingLabel.setStyleName("gamma");
         noResultFoundLabel = new Label(messages.foundNoTMResults());
-        noResultFoundLabel.setStyleName("tableMsg");
+        noResultFoundLabel.setStyleName("gamma");
 
-        searchType =
-                new EnumListBox<SearchType>(SearchType.class,
-                        searchTypeRenderer);
-        initWidget(uiBinder.createAndBindUi(this));
-
-        container.setWidget(loadingLabel);
-
-        headerLabel.setText(messages.translationMemoryHeading());
-        clearButton.setText(messages.clearButtonLabel());
-        searchButton.setText(messages.searchButtonLabel());
-        mergeTMButton.setText(messages.mergeTMButtonLabel());
-        mergeTMButton.setTitle(messages.mergeTMTooltip());
+        container.add(loadingLabel);
 
         diffModeDiff.setText(messages.diffModeAsDiff());
         diffModeHighlight.setText(messages.diffModeAsHighlight());
@@ -211,17 +199,19 @@ public class TransMemoryView extends Composite implements
 
     @Override
     public void startProcessing() {
-        container.setWidget(loadingLabel);
+        container.clear();
+        container.add(loadingLabel);
 
         clearTableContent();
     }
 
     @Override
     public void stopProcessing(boolean showResult) {
+        container.clear();
         if (!showResult) {
-            container.setWidget(noResultFoundLabel);
+            container.add(noResultFoundLabel);
         } else {
-            container.setWidget(resultTable);
+            container.add(resultTable);
         }
     }
 
@@ -355,7 +345,6 @@ public class TransMemoryView extends Composite implements
             resultTable.getFlexCellFormatter().setStyleName(i + 1, ORIGIN_COL,
                     "centered");
         }
-        container.setWidget(resultTable);
     }
 
     @Override
