@@ -59,9 +59,9 @@ public class ProjectPage extends BasePage {
         return getTitle().replaceAll("Zanata:", "");
     }
 
-    public CreateVersionPage clickCreateVersionLink() {
+    public EditVersionPage clickCreateVersionLink() {
         loggedInBody.findElement(By.id("addIterationLink")).click();
-        return new CreateVersionPage(getDriver());
+        return new EditVersionPage(getDriver());
     }
 
     public ProjectVersionPage goToVersion(final String versionId) {

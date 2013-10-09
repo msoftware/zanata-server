@@ -22,7 +22,7 @@ package org.zanata.workflow;
 
 import java.util.List;
 
-import org.zanata.page.projects.CreateVersionPage;
+import org.zanata.page.projects.EditVersionPage;
 import org.zanata.page.projects.ProjectPage;
 import org.zanata.page.projects.ProjectVersionPage;
 import org.zanata.page.projects.ProjectsPage;
@@ -67,13 +67,13 @@ public class ProjectWorkFlow extends AbstractWebWorkFlow {
                     projectVersion);
             return projectPage.goToVersion(projectVersion);
         }
-        CreateVersionPage createVersionPage =
+        EditVersionPage editVersionPage =
                 projectPage.clickCreateVersionLink().inputVersionId(
                         projectVersion);
-        createVersionPage.selectProjectType("Podir");
-        createVersionPage.selectStatus("READONLY");
-        createVersionPage.selectStatus("ACTIVE");
-        return createVersionPage.saveVersion();
+        editVersionPage.selectProjectType("Podir");
+        editVersionPage.selectStatus("READONLY");
+        editVersionPage.selectStatus("ACTIVE");
+        return editVersionPage.saveVersion();
     }
 
     public ProjectPage goToProjectByName(String projectName) {
