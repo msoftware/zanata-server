@@ -50,9 +50,6 @@ public class TranslationView extends Composite implements
     LayoutPanel southPanelContainer;
 
     @UiField
-    LayoutPanel southPanel;
-
-    @UiField
     LayoutPanel editorContainer;
 
     @UiField(provided = true)
@@ -78,7 +75,7 @@ public class TranslationView extends Composite implements
         mainSplitPanel.setWidgetMinSize(southPanelContainer,
                 (int) MIN_SOUTH_PANEL_HEIGHT);
 
-        southPanel.add(tmGlossaryPanel);
+        southPanelContainer.add(tmGlossaryPanel);
 
         setEditorView(translationEditorView.asWidget());
 

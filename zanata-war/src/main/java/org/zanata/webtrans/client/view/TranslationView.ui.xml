@@ -14,12 +14,8 @@
     <g:layer top="0px" bottom="0px">
       <g:SplitLayoutPanel ui:field="mainSplitPanel">
         <g:south size="150">
-          <g:LayoutPanel ui:field="southPanelContainer" styleName="new-zanata">
-            <g:layer top="0" bottom="5px">
-              <g:LayoutPanel ui:field="southPanel"
-                styleName="{style.southPanel}" />
-            </g:layer>
-          </g:LayoutPanel>
+          <g:LayoutPanel ui:field="southPanelContainer"
+            styleName="new-zanata" />
         </g:south>
         <g:center>
           <g:LayoutPanel ui:field="editorContainer" />
