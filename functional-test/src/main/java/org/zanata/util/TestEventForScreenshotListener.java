@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FileUtils;
@@ -23,52 +24,46 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 public class TestEventForScreenshotListener extends AbstractWebDriverEventListener {
 
     private WebDriver driver;
-    private File baseDir;
-    private String testId = "";
+    private File dirForTest = null;
 
     /**
      * A registered TestEventListener will perform actions on navigate,
      * click and exception events
      * @param drv the WebDriver to derive screen shots from
-     * @param targetDirectory full path to screen shot storage
      */
-    public TestEventForScreenshotListener(WebDriver drv, String targetDirectory) {
+    public TestEventForScreenshotListener(WebDriver drv) {
         driver = drv;
-        baseDir = new File(targetDirectory);
-        log.info("Writing screenshots to {}", baseDir);
     }
 
     /**
-     * Update the screen shot directory/filename test ID component
-     * @param testId test identifier string
+     * Update the screen shot directory for test ID.
+     * @param dirForTest directory for a particular test
      */
-    public void updateTestID(String testId) {
-        this.testId = testId;
+    public void updateTestID(File dirForTest) {
+        this.dirForTest = dirForTest;
     }
 
     private void createScreenshot(String ofType) {
+        Preconditions.checkNotNull(dirForTest,
+            "Have you set webdriver.screenshot.dir property?");
         try {
-            File testIDDir = new File(baseDir, testId);
-            testIDDir.mkdirs();
+            dirForTest.mkdirs();
             File screenshotFile =
                     ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(screenshotFile,
-                new File(testIDDir, generateFileName(ofType)));
+                new File(dirForTest, generateFileName(ofType)));
 
         } catch (WebDriverException wde) {
             throw new RuntimeException("[Screenshot]: Invalid WebDriver: "
                     + wde.getMessage());
         } catch (IOException ioe) {
-            throw new RuntimeException("[Screenshot]: Failed to write to "
-                    + baseDir);
-        } catch (NullPointerException npe) {
-            throw new RuntimeException("[Screenshot]: Null Object: "
-                    + npe.getMessage());
+            throw new RuntimeException("[Screenshot]: Failed to write", ioe);
         }
     }
 
     private String generateFileName(String ofType) {
-        return testId.concat(":").concat(String.valueOf(new Date().getTime()))
+        return dirForTest.getName()
+            .concat(":").concat(String.valueOf(new Date().getTime()))
                 .concat(ofType).concat(".png");
     }
 

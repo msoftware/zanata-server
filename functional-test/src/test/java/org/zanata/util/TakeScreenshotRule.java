@@ -6,6 +6,7 @@ import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.rules.ExternalResource;
+import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.zanata.page.WebDriverFactory;
@@ -15,34 +16,31 @@ import org.zanata.page.WebDriverFactory;
  *         href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @Slf4j
-public class TakeScreenshotRule extends ExternalResource {
+public class TakeScreenshotRule extends TestWatcher {
 
-    private String testDisplayName;
+    private File dirForTest;
 
     @Override
-    public Statement apply(Statement base, Description description) {
-        testDisplayName = description.getDisplayName();
-        return super.apply(base, description);
+    protected void starting(Description description) {
+        String testDisplayName = description.getDisplayName();
+        dirForTest =
+            new ScreenshotDirForTest(testDisplayName).getDirForTest();
+        WebDriverFactory.INSTANCE.updateListenerTestName(dirForTest);
     }
 
     @Override
-    protected void before() throws Throwable {
-        super.before();
-        WebDriverFactory.INSTANCE.updateListenerTestName(testDisplayName);
-        String date = new Date().toString();
-        log.debug("[TEST] {}:{}", testDisplayName, date);
-    }
-
-    @Override
-    protected void after() {
-        super.after();
-        File baseDir = new File(WebDriverFactory.getScreenshotBaseDir());
+    protected void succeeded(Description description) {
         try {
-            FileUtils.deleteDirectory(baseDir);
+            FileUtils.deleteDirectory(dirForTest);
         }
         catch (IOException e) {
             log.warn("error deleting screenshot base directory: {}",
                 e.getMessage());
         }
+    }
+
+    @Override
+    protected void failed(Throwable e, Description description) {
+        log.error("Test failed. Screenshot is stored at {}", dirForTest);
     }
 }

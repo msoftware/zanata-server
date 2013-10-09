@@ -60,6 +60,6 @@ public class FunctionalTest {
         String testId = getClass().getName();
         testId = testId.substring(testId.lastIndexOf(".")+1)
             .concat(":").concat(name.getMethodName());
-        WebDriverFactory.INSTANCE.updateListenerTestName(testId);
+//        WebDriverFactory.INSTANCE.updateListenerTestName(testId);
     }
 }

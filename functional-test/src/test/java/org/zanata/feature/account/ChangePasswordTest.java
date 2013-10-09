@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -49,8 +50,8 @@ public class ChangePasswordTest {
     @Rule
     public ResetDatabaseRule resetDatabaseRule = new ResetDatabaseRule();
 
-    @Rule
-    public TakeScreenshotRule screenshotRule =
+    @ClassRule
+    public static TakeScreenshotRule screenshotRule =
             new TakeScreenshotRule();
 
     @Before
