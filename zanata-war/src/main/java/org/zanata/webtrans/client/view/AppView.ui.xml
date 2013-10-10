@@ -20,6 +20,11 @@
       text-overflow: ellipsis;
     }
 
+    .right-nav {
+      position: absolute;
+      right: 0;
+    }
+
     .translationStats {
       width: 230px;
       height: 1.2em;
@@ -81,7 +86,7 @@
               <fui:Breadcrumb ui:field="selectedDocumentSpan" />
             </nobr>
           </li>
-          <li style="float:right">
+          <li class="{style.right-nav}">
             <fui:TransUnitCountBar ui:field="translationStatsBar"
               styleName="{style.translationStats}" />
             <g:InlineLabel styleName="icon-list {style.topMenuButton}"

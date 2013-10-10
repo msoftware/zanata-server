@@ -47,6 +47,7 @@
     <g:layer top="0px" bottom="0px">
       <g:LayoutPanel styleName="{style.mainPanel}">
         <g:layer top='0' height='32px' left="0px" right="0px">
+
           <g:HorizontalPanel styleName="{style.topBar}"
             verticalAlignment="ALIGN_MIDDLE">
             <g:cell width="305px">
@@ -80,6 +81,7 @@
               </g:HTMLPanel>
             </g:cell>
           </g:HorizontalPanel>
+
         </g:layer>
         <g:layer top='28px' bottom="0px">
           <g:ScrollPanel styleName="{style.listContainer}">
