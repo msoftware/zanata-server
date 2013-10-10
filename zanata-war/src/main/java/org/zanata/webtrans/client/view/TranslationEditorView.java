@@ -20,7 +20,7 @@
  */
 package org.zanata.webtrans.client.view;
 
-import org.zanata.webtrans.client.resources.Resources;
+import com.google.gwt.user.client.ui.Anchor;
 import org.zanata.webtrans.client.resources.WebTransMessages;
 import org.zanata.webtrans.client.ui.HasPager;
 import org.zanata.webtrans.client.ui.Pager;
@@ -60,14 +60,11 @@ public class TranslationEditorView extends Composite implements
     @UiField(provided = true)
     Pager pager;
 
-    @UiField(provided = true)
-    Resources resources;
-
     @UiField
     HTMLPanel filterPanelContainer;
 
     @UiField
-    InlineLabel refreshCurrentPage, resize;
+    Anchor refreshCurrentPage, resize;
 
     private Listener listener;
 
@@ -77,10 +74,8 @@ public class TranslationEditorView extends Composite implements
     private final static String STYLE_RESTORE_SOUTHPANEL = "icon-up-circle";
 
     @Inject
-    public TranslationEditorView(final WebTransMessages messages,
-            final Resources resources) {
-        this.resources = resources;
-        this.pager = new Pager(messages, resources);
+    public TranslationEditorView(final WebTransMessages messages) {
+        this.pager = new Pager(messages);
         this.messages = messages;
 
         initWidget(uiBinder.createAndBindUi(this));

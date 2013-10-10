@@ -34,7 +34,7 @@
       </li>
     </ul>
 
-    <g:HTMLPanel ui:field="data" />
+    <g:HTMLPanel ui:field="data" styleName="txt--align-center" />
 
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -8,14 +8,13 @@
     }
 
     .container ul {
-      display: inline-block;
       margin: 0;
       padding: 0;
     }
 
-    .container > ul > li {
-      display: inline-block;
-    }
+    /*.container > ul > li {*/
+      /*display: inline-block;*/
+    /*}*/
 
     .transFilterTextBoxEmpty {
       color: grey;
@@ -69,11 +68,11 @@
       z-index: 3;
       background-color: #fafafa;
       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(0, 0, 0, 0.2);
-      top: 95%;
     }
 
     .container ul.filterList li {
       display: inherit;
+      margin-right: 0 !important;
     }
 
     .drop-down {
@@ -89,9 +88,7 @@
       display: block;
     }
 
-    .drop-down label,
     .drop-down input[type=checkbox],
-    .filterList li label,
     .filterList li input[type=checkbox] {
       cursor: pointer;
       display: inline-block;
@@ -100,7 +97,8 @@
 
     .drop-down label,
     .filterList li label {
-      line-height: 32px;
+      line-height: 2em;
+      font-weight: normal;
     }
 
     .drop-down input[type=checkbox] {

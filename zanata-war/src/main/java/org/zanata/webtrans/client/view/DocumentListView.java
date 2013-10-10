@@ -109,7 +109,7 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
         confirmationBox =
                 new DownloadFilesConfirmationBox(false, messages, resources);
         fileUploadDialog = new FileUploadDialog(resources);
-        pager = new Pager(messages, resources);
+        pager = new Pager(messages);
         searchField = new SearchField(this);
         searchField.setTextBoxTitle(messages.docListFilterDescription());
 

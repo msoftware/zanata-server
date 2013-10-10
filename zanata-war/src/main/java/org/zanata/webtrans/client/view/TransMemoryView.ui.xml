@@ -58,7 +58,7 @@
       </li>
     </ul>
 
-    <g:HTMLPanel ui:field="container" />
+    <g:HTMLPanel ui:field="container" styleName="txt--align-center" />
 
   </g:HTMLPanel>
 </ui:UiBinder>
