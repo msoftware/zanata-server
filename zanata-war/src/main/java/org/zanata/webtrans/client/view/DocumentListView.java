@@ -23,6 +23,7 @@ package org.zanata.webtrans.client.view;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.Button;
 import org.zanata.rest.dto.stats.ContainerTranslationStatistics;
 import org.zanata.webtrans.client.Application;
 import org.zanata.webtrans.client.resources.Resources;
@@ -83,7 +84,7 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
     RadioButton statsByMsg, statsByWord;
 
     @UiField
-    PushButton downloadAllFiles;
+    Button downloadAllFiles;
 
     @UiField(provided = true)
     Pager pager;

@@ -71,6 +71,7 @@
 
     .drop-down {
       position: relative;
+      vertical-align: top;
     }
 
     .drop-down:hover {
