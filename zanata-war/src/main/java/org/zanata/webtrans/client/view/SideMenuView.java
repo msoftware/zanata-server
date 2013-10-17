@@ -9,6 +9,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
@@ -27,20 +28,16 @@ public class SideMenuView extends Composite implements SideMenuDisplay {
         String selectedButton();
 
         String alertTab();
-
-        String notificationLabel();
-
-        String menuButton();
-
-        String mainPanel();
     }
 
     @UiField
     Styles style;
 
     @UiField
-    InlineLabel notificationTab, optionsTab, validationOptionsTab, chatTab,
-            notificationLabel;
+    Anchor notificationTab, optionsTab, validationOptionsTab, chatTab;
+
+    @UiField
+    InlineLabel notificationLabel;
 
     @UiField
     TabLayoutPanel container;

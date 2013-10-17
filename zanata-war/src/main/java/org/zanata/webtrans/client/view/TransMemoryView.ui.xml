@@ -18,19 +18,15 @@
       border-right: 2px solid #4e9fdd;
     }
 
-    .container {
-      overflow: auto;
-    }
-
   </ui:style>
 
-  <g:HTMLPanel styleName="{style.container}">
-    <ul class="list--horizontal l--push-h-half">
+  <g:HTMLPanel styleName="l--scroll-auto">
+    <ul class="list--horizontal l--push-h-quarter">
       <li class="epsilon">
         <ui:text from="{messages.translationMemoryHeading}" />
       </li>
       <li>
-        <g:TextBox ui:field="tmTextBox" />
+        <g:TextBox ui:field="tmTextBox" styleName="l--push-bottom-0" />
       </li>
       <li>
         <g:ValueListBox ui:field="searchType" />
@@ -57,8 +53,6 @@
         <g:RadioButton name="diffMode" ui:field="diffModeHighlight" />
       </li>
     </ul>
-
     <g:HTMLPanel ui:field="container" styleName="txt--align-center" />
-
   </g:HTMLPanel>
 </ui:UiBinder>

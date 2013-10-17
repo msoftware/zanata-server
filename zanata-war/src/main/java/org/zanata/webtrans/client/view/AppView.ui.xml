@@ -33,18 +33,8 @@
       display: inline-block;
     }
 
-    .topMenuButton {
-      cursor: pointer;
-      font-size: 20px;
-      color: #4E4E4E;
-    }
-
     .highlightedTab {
       color: #FF4500;
-    }
-
-    .topMenuButton:hover {
-      color: #0085CC;
     }
 
     .readonly_label {
@@ -55,14 +45,13 @@
     }
 
     .selectedTab, .selectedTab:hover {
-      color: #0085CC;
-      opacity: 1;
+      color: #416988 !important;
     }
 
     .disableTab, .disableTab:hover {
-      color: #777;
-      cursor: default;
-      opacity: 0.5;
+      color: #777 !important;
+      cursor: default !important;
+      opacity: 0.5 !important;
     }
 
     .content {
@@ -89,14 +78,14 @@
           <li class="{style.right-nav}">
             <fui:TransUnitCountBar ui:field="translationStatsBar"
               styleName="{style.translationStats}" />
-            <g:InlineLabel styleName="icon-list {style.topMenuButton}"
+            <g:Anchor styleName="icon-list txt--hero"
               ui:field="documentListTab" />
-            <g:InlineLabel styleName="icon-edit {style.topMenuButton}"
+            <g:Anchor styleName="icon-edit txt--hero"
               ui:field="editorTab" />
-            <g:InlineLabel styleName="icon-search {style.topMenuButton}"
+            <g:Anchor styleName="icon-search txt--hero"
               ui:field="searchAndReplaceTab" />
-            <g:InlineLabel ui:field="keyShortcuts"
-              styleName="icon-keyboard {style.topMenuButton}" />
+            <g:Anchor ui:field="keyShortcuts"
+              styleName="icon-keyboard txt--hero" />
           </li>
         </ul>
       </g:HTMLPanel>
@@ -113,8 +102,8 @@
       </g:HTMLPanel>
     </g:layer>
 
-    <g:layer right="0" width="24px" top="25px" bottom="10px">
-      <g:LayoutPanel ui:field="sideMenuContainer" />
+    <g:layer right="0" width="2em" top="25px" bottom="10px">
+      <g:LayoutPanel ui:field="sideMenuContainer" styleName="new-zanata" />
     </g:layer>
 
   </g:LayoutPanel>

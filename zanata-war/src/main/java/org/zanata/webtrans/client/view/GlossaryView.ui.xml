@@ -6,18 +6,16 @@
     type="org.zanata.webtrans.client.resources.UiMessages" />
 
   <ui:style>
-    .container {
-      overflow: auto;
-    }
+
   </ui:style>
 
-  <g:HTMLPanel styleName="{style.container}">
-    <ul class="list--horizontal l--push-h-half">
+  <g:HTMLPanel styleName="l--scroll-auto">
+    <ul class="list--horizontal l--push-h-quarter">
       <li class="epsilon">
         <ui:text from="{messages.glossaryHeading}" />
       </li>
       <li>
-        <g:TextBox ui:field="glossaryTextBox" />
+        <g:TextBox ui:field="glossaryTextBox" styleName="l--push-bottom-0" />
       </li>
       <li>
         <g:ValueListBox ui:field="searchType" />
@@ -33,8 +31,6 @@
         </g:Button>
       </li>
     </ul>
-
     <g:HTMLPanel ui:field="data" styleName="txt--align-center" />
-
   </g:HTMLPanel>
 </ui:UiBinder>

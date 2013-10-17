@@ -15,7 +15,6 @@
       opacity: 0.5;
       cursor: default !important;
     }
-
   </ui:style>
 
   <g:HTMLPanel styleName="new-zanata">
@@ -30,7 +29,7 @@
       </li>
       <li>
         <g:TextBox ui:field="gotoPage" maxLength="8"
-          styleName="{style.textBox}" />
+          styleName="{style.textBox} l--push-bottom-0" />
       </li>
       <li>
         <g:InlineLabel ui:field="pageCountLabel" />

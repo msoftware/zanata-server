@@ -7,18 +7,13 @@
     type="org.zanata.webtrans.client.resources.Resources" />
 
   <ui:style>
-    .container {
-      height: 100%;
-      overflow: auto;
-    }
-
     .messagePanel>li:hover {
       background-color: rgba(255, 255, 255, 0.05);
     }
 
   </ui:style>
 
-  <g:HTMLPanel styleName="new-zanata {style.container}">
+  <g:HTMLPanel styleName="l--push-all-quarter l--scroll-auto">
     <fui:UnorderedListWidget ui:field="messagePanel"
       styleName="list--no-bullets list--slat {style.messagePanel}" />
     <g:Anchor href="javascript:void(0)"
@@ -26,6 +21,5 @@
       ui:field="clearLink">
       <ui:msg>Clear</ui:msg>
     </g:Anchor>
-
   </g:HTMLPanel>
 </ui:UiBinder>

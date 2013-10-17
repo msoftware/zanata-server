@@ -11,14 +11,10 @@
       right: 0;
     }
 
-    .scrollPanel {
-      overflow: auto;
-      width: 100%;
-    }
-
     .form-input input {
+      display: inline-block;
       vertical-align: middle;
-      margin-bottom: 0.15em;
+      margin-right: 0.3em;
     }
 
     .top>li {
@@ -66,7 +62,7 @@
       </fui:UnorderedListWidget>
     </g:layer>
     <g:layer top='3em' bottom="0">
-      <g:HTMLPanel styleName="{style.scrollPanel}">
+      <g:HTMLPanel styleName="l--scroll-auto">
         <g:FlowPanel ui:field="documentListContainer" />
         <fui:Pager ui:field="pager" />
       </g:HTMLPanel>
