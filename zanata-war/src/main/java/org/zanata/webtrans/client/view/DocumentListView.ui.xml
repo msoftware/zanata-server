@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:f="urn:import:org.zanata.webtrans.client"
   xmlns:fui="urn:import:org.zanata.webtrans.client.ui"
   xmlns:c="urn:import:com.google.gwt.user.cellview.client">
 
@@ -17,6 +16,10 @@
       margin-right: 0.3em;
     }
 
+    .form-input label {
+      margin-bottom: 0;
+    }
+
     .top>li {
       vertical-align: middle;
     }
@@ -24,7 +27,7 @@
   </ui:style>
 
   <g:LayoutPanel styleName="new-zanata">
-    <g:layer top='0' height='2.5em' left="0px" right="0px">
+    <g:layer top='0' height='2.5em' left="0" right="0">
       <fui:UnorderedListWidget styleName="list--horizontal {style.top}">
         <g:HTMLPanel tag="li" styleName="l--push-right-half">
           <fui:SearchField ui:field="searchField" />
@@ -62,8 +65,8 @@
       </fui:UnorderedListWidget>
     </g:layer>
     <g:layer top='3em' bottom="0">
-      <g:HTMLPanel styleName="l--scroll-auto">
-        <g:FlowPanel ui:field="documentListContainer" />
+      <g:HTMLPanel styleName="l--scroll-auto" ui:field="tableWrapper">
+        <fui:DocumentListTable ui:field="documentListTable" />
         <fui:Pager ui:field="pager" />
       </g:HTMLPanel>
     </g:layer>

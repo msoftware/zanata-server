@@ -3,6 +3,7 @@ package org.zanata.webtrans.client.presenter;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import net.customware.gwt.presenter.client.EventBus;
 
 import org.mockito.Mock;
@@ -71,16 +72,12 @@ public class TranslationEditorPresenterTest {
 
         verify(transFilterPresenter).bind();
         verify(transFilterDisplay).asWidget();
-        verify(display).setFilterView(transFilterDisplay.asWidget());
 
         verify(transUnitsTablePresenter).bind();
         verify(transUnitsTableDisplay).asWidget();
-        verify(display).setEditorView(transUnitsTableDisplay.asWidget());
 
         verify(transUnitNavigationPresenter).bind();
         verify(transUnitNavigationDisplay).asWidget();
-        verify(display).setTransUnitNavigation(
-                transUnitNavigationDisplay.asWidget());
 
         verify(eventBus).addHandler(PageChangeEvent.TYPE, presenter);
         verify(eventBus).addHandler(PageChangeEvent.TYPE, presenter);

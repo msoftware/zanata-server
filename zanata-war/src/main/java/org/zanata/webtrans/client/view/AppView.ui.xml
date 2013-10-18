@@ -62,7 +62,7 @@
   </ui:style>
   <g:LayoutPanel stylePrimaryName="{style.rootContainer}"
     ui:field="rootContainer">
-    <g:layer top="0px" height="1.8em" left="0.5em" right="0.5em">
+    <g:layer top="0" height="1.8em" left="0.5em" right="0.5em">
       <g:HTMLPanel styleName="new-zanata">
         <ul class="list--horizontal">
           <li class="{style.topPanel-Workspace}">
@@ -91,18 +91,18 @@
       </g:HTMLPanel>
     </g:layer>
 
-    <g:layer top="25px" bottom="0px" left='0.5em' right='0.5em'>
+    <g:layer top="2em" bottom="0" left='0.5em' right='0.5em'>
       <g:HTMLPanel ui:field="contentContainer">
         <div class="new-zanata">
           <fui:UnorderedListWidget ui:field="notifications"
             styleName="list--no-bullets l--push-right-1" />
         </div>
         <g:TabLayoutPanel ui:field="content" styleName="{style.content}"
-          barHeight="0" barUnit='PX' />
+          barHeight="0" barUnit='EM' />
       </g:HTMLPanel>
     </g:layer>
 
-    <g:layer right="0" width="2em" top="25px" bottom="10px">
+    <g:layer right="0" width="2em" top="2em" bottom="0">
       <g:LayoutPanel ui:field="sideMenuContainer" styleName="new-zanata" />
     </g:layer>
 

@@ -23,7 +23,6 @@ package org.zanata.webtrans.client.view;
 import java.util.HashMap;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Button;
 import org.zanata.rest.dto.stats.ContainerTranslationStatistics;
 import org.zanata.webtrans.client.Application;
 import org.zanata.webtrans.client.resources.Resources;
@@ -52,11 +51,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -75,9 +74,6 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
     SearchField searchField;
 
     @UiField
-    FlowPanel documentListContainer;
-
-    @UiField
     CheckBox exactSearchCheckBox, caseSensitiveCheckBox;
 
     @UiField
@@ -89,7 +85,11 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
     @UiField(provided = true)
     Pager pager;
 
-    private DocumentListTable documentListTable;
+    @UiField(provided = true)
+    DocumentListTable documentListTable;
+
+    @UiField
+    HTMLPanel tableWrapper;
 
     private final DownloadFilesConfirmationBox confirmationBox;
     private final FileUploadDialog fileUploadDialog;
@@ -114,6 +114,9 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
         searchField = new SearchField(this);
         searchField.setTextBoxTitle(messages.docListFilterDescription());
 
+        documentListTable =
+                new DocumentListTable(userworkspaceContext, messages, resources);
+
         initWidget(uiBinder.createAndBindUi(this));
 
         caseSensitiveCheckBox.setTitle(messages
@@ -122,10 +125,6 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
                 .docListFilterExactMatchDescription());
         statsByMsg.setText(messages.byMessage());
         statsByWord.setText(messages.byWords());
-
-        documentListTable =
-                new DocumentListTable(userworkspaceContext, messages, resources);
-        documentListContainer.add(documentListTable);
     }
 
     @Override
@@ -179,7 +178,7 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
 
     @Override
     public void setLayout(String layout) {
-        documentListContainer.setStyleName(layout);
+        tableWrapper.addStyleName("l--scroll-auto " + layout);
     }
 
     @Override
@@ -251,7 +250,6 @@ public class DocumentListView extends Composite implements DocumentListDisplay {
             public Widget asWidget() {
                 Anchor anchor = new Anchor();
                 anchor.setStyleName("icon-download");
-                anchor.addStyleName("downloadLink");
                 anchor.setHref(url);
                 anchor.setTarget("_blank");
                 return anchor;

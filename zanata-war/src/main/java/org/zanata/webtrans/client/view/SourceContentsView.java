@@ -66,14 +66,10 @@ public class SourceContentsView extends Composite implements
         FlowPanel root = new FlowPanel();
         root.setSize("100%", "100%");
 
-        FlowPanel container = new FlowPanel();
-        container.setSize("100%", "100%");
-
         sourcePanelContainer = new Grid(DEFAULT_ROWS, COLUMNS);
         sourcePanelContainer.addStyleName("sourceTable");
 
-        container.add(sourcePanelContainer);
-        root.add(container);
+        root.add(sourcePanelContainer);
 
         InlineLabel bookmarkIcon = createBookmarkIcon();
         root.add(bookmarkIcon);
