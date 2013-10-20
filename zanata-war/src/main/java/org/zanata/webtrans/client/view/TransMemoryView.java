@@ -114,7 +114,6 @@ public class TransMemoryView extends Composite implements
         initWidget(uiBinder.createAndBindUi(this));
 
         resultTable = new FlexTable();
-        resultTable.setStyleName("resultTable");
         resultTable.setCellSpacing(0);
         resultTable.setCellPadding(3);
 
