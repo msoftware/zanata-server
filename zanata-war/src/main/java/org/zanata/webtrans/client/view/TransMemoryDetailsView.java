@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -38,16 +39,13 @@ public class TransMemoryDetailsView implements TransMemoryDetailsDisplay {
     DialogBox dialogBox;
 
     @UiField
-    Label sourceComment, targetComment;
+    TextBox sourceComment, targetComment, targetState;
 
     @UiField
     InlineLabel projectIterationName, docName;
 
     @UiField
     Label lastModified;
-
-    @UiField
-    Label targetState;
 
     @UiField
     Button dismissButton;

@@ -8,108 +8,60 @@
   ui:generateLocales="en">
 
   <ui:style>
-    .button {
-      float: right;
-    }
-
     .content {
       background-color: #ffffff;
       padding: 2px;
     }
 
-    .comment {
-      background: #d3d3d3;
+    .container {
+      height: 30em;
     }
-
-    .table {
-      table-layout: fixed;
-    }
-
-    .headerCol {
-      text-align: right;
-      width: 120px;
-      padding-top: 8px;
-    }
-
   </ui:style>
 
-  <g:DialogBox autoHide="true" modal="true" styleName="gwt-DialogBox-fixedSize">
-    <g:LayoutPanel>
-      <g:layer top="5px" height="90px" left="0" right="0">
-        <g:HTMLPanel>
-          <g:InlineLabel styleName="headerLabel alignTop" text="Locations:" />
-          <g:ListBox ui:field='documentListBox' visibleItemCount='5'
-            width="518px" />
-        </g:HTMLPanel>
-      </g:layer>
-
-      <g:layer top="100px" height="35px" left="0" right="0">
-        <g:HTMLPanel>
-          <g:InlineLabel styleName="headerLabel" text="Project/Iteration:" />
+  <g:DialogBox autoHide="true" modal="true"
+    styleName="gwt-DialogBox {style.container}">
+    <g:HTMLPanel styleName="new-zanata">
+      <div class="l__wrapper">
+        <div>
+          <label>Locations</label>
+          <g:ListBox ui:field='documentListBox' visibleItemCount='5' />
+        </div>
+        <div>
+          <span class="delta">Project/Iteration</span>
           <g:InlineLabel ui:field='projectIterationName' />
-          <br />
-          <g:InlineLabel styleName="headerLabel" text="Document:" />
+        </div>
+        <div>
+          <span class="delta">Document</span>
           <g:InlineLabel ui:field='docName' />
-        </g:HTMLPanel>
-      </g:layer>
+        </div>
+        <div>
+          <label>Source</label>
+          <g:SimplePanel ui:field="sourceTextContainer"
+            styleName="{style.content}" />
+        </div>
+        <div>
+          <label>Source Comments</label>
+          <g:TextBox readOnly="true" ui:field="sourceComment" />
+        </div>
+        <div>
+          <label>Target</label>
+          <g:SimplePanel ui:field="targetTextContainer"
+            styleName="{style.content}" />
+        </div>
+        <div>
+          <label>Target Comments</label>
+          <g:TextBox ui:field='targetComment' readOnly="true" />
+        </div>
+        <div>
+          <label>Content State</label>
+          <g:TextBox ui:field='targetState' />
+        </div>
+        <div>
+          <g:InlineLabel ui:field='lastModified' />
+        </div>
+      </div>
+      <g:Button ui:field='dismissButton' styleName="l--float-right" />
+    </g:HTMLPanel>
 
-      <g:layer top="140px" height="185px" left="0" right="0px">
-        <g:ScrollPanel height="185px" width="100%">
-          <g:Grid styleName="{style.table}">
-            <g:row>
-              <g:customCell styleName="{style.headerCol}">
-                <g:Label styleName="headerLabel" text="Source:" />
-              </g:customCell>
-              <g:customCell>
-                <g:SimplePanel ui:field="sourceTextContainer"
-                  styleName="{style.content}" />
-              </g:customCell>
-            </g:row>
-            <g:row>
-              <g:customCell styleName="{style.headerCol}">
-                <g:Label styleName="headerLabel" text="Source Comment:" />
-              </g:customCell>
-              <g:customCell>
-                <g:Label ui:field='sourceComment' styleName="{style.comment}" />
-              </g:customCell>
-            </g:row>
-            <g:row>
-              <g:customCell styleName="{style.headerCol}">
-                <g:Label styleName="headerLabel" text="Target:" />
-              </g:customCell>
-              <g:customCell>
-                <g:SimplePanel ui:field="targetTextContainer"
-                  styleName="{style.content}" />
-              </g:customCell>
-            </g:row>
-            <g:row>
-              <g:customCell styleName="{style.headerCol}">
-                <g:Label styleName="headerLabel" text="Target Comment:" />
-              </g:customCell>
-              <g:customCell>
-                <g:Label ui:field='targetComment' styleName="{style.comment}" />
-              </g:customCell>
-            </g:row>
-            <g:row>
-              <g:customCell styleName="{style.headerCol}">
-                <g:Label styleName="headerLabel" text="Content State:" />
-              </g:customCell>
-              <g:customCell>
-                <g:Label ui:field='targetState' />
-              </g:customCell>
-            </g:row>
-          </g:Grid>
-        </g:ScrollPanel>
-      </g:layer>
-
-      <g:layer top="340px" height="30px">
-        <g:HTMLPanel>
-          <g:InlineLabel ui:field='lastModified'
-            styleName="lastModifiedLabel" />
-          <g:Button ui:field='dismissButton'
-            addStyleNames="button {style.button}" />
-        </g:HTMLPanel>
-      </g:layer>
-    </g:LayoutPanel>
   </g:DialogBox>
 </ui:UiBinder>

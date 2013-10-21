@@ -8,24 +8,23 @@ import org.zanata.webtrans.shared.model.WorkspaceId;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FileUploadDialog extends DialogBox {
     private final FileUpload upload;
     private final CheckBox merge;
-    private final PushButton cancelButton;
-    private final PushButton uploadButton;
+    private final Button cancelButton;
+    private final Button uploadButton;
     private final Image loadingIcon;
     private final FormPanel form;
 
@@ -40,9 +39,10 @@ public class FileUploadDialog extends DialogBox {
         setText("File upload");
         setGlassEnabled(true);
         setAutoHideEnabled(true);
-        setStyleName("gwt-DialogBox-NoFixedSize");
+        setStyleName("gwt-DialogBox");
 
-        VerticalPanel panel = new VerticalPanel();
+        UnorderedListWidget panel = new UnorderedListWidget();
+        panel.setStyleName("list--no-bullets");
 
         loadingIcon = new Image(resources.spinner());
         loadingIcon.setVisible(false);
@@ -53,20 +53,18 @@ public class FileUploadDialog extends DialogBox {
         merge = new CheckBox("Merge?");
         merge.setValue(true);
 
-        cancelButton = new PushButton("Cancel");
-        cancelButton.addStyleName("button");
-        uploadButton = new PushButton("Upload");
-        uploadButton.addStyleName("button");
+        cancelButton = new Button("Cancel");
+        uploadButton = new Button("Upload");
 
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setStyleName("buttonPanel");
-        buttonPanel.add(loadingIcon);
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(uploadButton);
+        UnorderedListWidget buttonPanel = new UnorderedListWidget();
+        buttonPanel.setStyleName("list--horizontal l--float-right");
+        buttonPanel.add(new ListItemWidget(loadingIcon));
+        buttonPanel.add(new ListItemWidget(cancelButton));
+        buttonPanel.add(new ListItemWidget(uploadButton));
 
-        panel.add(upload);
-        panel.add(merge);
-        panel.add(buttonPanel);
+        panel.add(new ListItemWidget(upload));
+        panel.add(new ListItemWidget(merge));
+        panel.add(new ListItemWidget(buttonPanel));
 
         projectSlug = new Hidden("projectSlug");
         versionSlug = new Hidden("versionSlug");
@@ -82,13 +80,11 @@ public class FileUploadDialog extends DialogBox {
         panel.add(targetLocale);
         panel.add(mergeTranslation);
 
-        panel.setCellHorizontalAlignment(buttonPanel,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-
         // Because we're going to add a FileUpload widget, we'll need to set
         // the
         // form to use the POST method, and multipart MIME encoding.
         form = new FormPanel();
+        form.setStyleName("new-zanata");
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
         form.setMethod(FormPanel.METHOD_POST);
         form.setWidget(panel);

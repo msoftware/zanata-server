@@ -31,6 +31,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -114,20 +115,21 @@ public class TransMemoryView extends Composite implements
         initWidget(uiBinder.createAndBindUi(this));
 
         resultTable = new FlexTable();
+        resultTable.setStyleName("resultTable");
         resultTable.setCellSpacing(0);
         resultTable.setCellPadding(3);
 
         FlexCellFormatter formatter = resultTable.getFlexCellFormatter();
 
-        formatter.setStyleName(0, SOURCE_COL, "th");
-        formatter.setStyleName(0, TARGET_COL, "th");
-        formatter.setStyleName(0, NUM_TRANS_COL, "th centered numTransCol");
-        formatter.setStyleName(0, ACTION_COL, "th centered actionCol");
-        formatter.setStyleName(0, SIMILARITY_COL, "th centered similarityCol");
-        formatter.setStyleName(0, ORIGIN_COL, "th centered originCol");
+        formatter.setStyleName(0, SOURCE_COL, "epsilon");
+        formatter.setStyleName(0, TARGET_COL, "epsilon");
+        formatter.setStyleName(0, NUM_TRANS_COL, "epsilon txt--align-center smallCol");
+        formatter.setStyleName(0, ACTION_COL, "epsilon txt--align-center smallCol");
+        formatter.setStyleName(0, SIMILARITY_COL, "epsilon txt--align-center smallCol");
+        formatter.setStyleName(0, ORIGIN_COL, "epsilon txt--align-center smallCol");
 
-        InlineLabel diffLegendInfo = new InlineLabel();
-        diffLegendInfo.setStyleName("icon-info-circle-2 details");
+        Anchor diffLegendInfo = new Anchor();
+        diffLegendInfo.setStyleName("icon-info-circle-2 txt--lead");
         diffLegendInfo.setTitle(messages.colorLegend());
 
         diffLegendInfo.addClickHandler(new ClickHandler() {
@@ -295,7 +297,7 @@ public class TransMemoryView extends Composite implements
 
             resultTable.setWidget(i + 1, NUM_TRANS_COL, countLabel);
             resultTable.getFlexCellFormatter().setStyleName(i + 1,
-                    NUM_TRANS_COL, "centered");
+                    NUM_TRANS_COL, "txt--align-center");
 
             if (i % 2 == 1) {
                 resultTable.getRowFormatter().setStyleName(i + 1, "oddRow");
@@ -313,15 +315,15 @@ public class TransMemoryView extends Composite implements
 
             resultTable.setWidget(i + 1, ACTION_COL, copyButton);
             resultTable.getFlexCellFormatter().setStyleName(i + 1, ACTION_COL,
-                    "centered");
+                    "txt--align-center");
 
             Label similarityLabel =
                     new Label((int) item.getSimilarityPercent() + "%");
             resultTable.setWidget(i + 1, SIMILARITY_COL, similarityLabel);
             resultTable.getFlexCellFormatter().setStyleName(i + 1,
-                    SIMILARITY_COL, "centered");
+                    SIMILARITY_COL, "txt--align-center");
 
-            InlineLabel infoCell = new InlineLabel();
+            Anchor infoCell = new Anchor();
             if (item.getMatchType() == MatchType.Imported) {
                 String originStr = Joiner.on(", ").join(item.getOrigins());
                 String ellipsizedStr =
@@ -331,7 +333,7 @@ public class TransMemoryView extends Composite implements
                 infoCell.setText(ellipsizedStr);
                 infoCell.setTitle(originStr);
             } else {
-                infoCell.setStyleName("icon-info-circle-2 details");
+                infoCell.setStyleName("icon-info-circle-2 txt--lead");
                 infoCell.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
@@ -342,7 +344,7 @@ public class TransMemoryView extends Composite implements
 
             resultTable.setWidget(i + 1, ORIGIN_COL, infoCell);
             resultTable.getFlexCellFormatter().setStyleName(i + 1, ORIGIN_COL,
-                    "centered");
+                    "txt--align-center");
         }
     }
 
