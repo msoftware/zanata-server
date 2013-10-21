@@ -1,67 +1,53 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:f="urn:import:org.zanata.webtrans.client"
   xmlns:fui="urn:import:org.zanata.webtrans.client.ui"
-  ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
-  ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
   ui:generateLocales="en">
 
   <ui:style>
-    .content {
-      background-color: #ffffff;
-      padding: 2px;
-    }
-
     .container {
       height: 30em;
     }
   </ui:style>
 
-  <g:DialogBox autoHide="true" modal="true"
-    styleName="gwt-DialogBox {style.container}">
-    <g:HTMLPanel styleName="new-zanata">
-      <div class="l__wrapper">
-        <div>
-          <label>Locations</label>
-          <g:ListBox ui:field='documentListBox' visibleItemCount='5' />
-        </div>
-        <div>
-          <span class="delta">Project/Iteration</span>
-          <g:InlineLabel ui:field='projectIterationName' />
-        </div>
-        <div>
-          <span class="delta">Document</span>
-          <g:InlineLabel ui:field='docName' />
-        </div>
-        <div>
-          <label>Source</label>
-          <g:SimplePanel ui:field="sourceTextContainer"
-            styleName="{style.content}" />
-        </div>
-        <div>
-          <label>Source Comments</label>
-          <g:TextBox readOnly="true" ui:field="sourceComment" />
-        </div>
-        <div>
-          <label>Target</label>
-          <g:SimplePanel ui:field="targetTextContainer"
-            styleName="{style.content}" />
-        </div>
-        <div>
-          <label>Target Comments</label>
-          <g:TextBox ui:field='targetComment' readOnly="true" />
-        </div>
-        <div>
-          <label>Content State</label>
-          <g:TextBox ui:field='targetState' />
-        </div>
-        <div>
-          <g:InlineLabel ui:field='lastModified' />
-        </div>
+  <g:HTMLPanel styleName="new-zanata">
+    <fui:DialogBoxCloseButton ui:field="closeButton" />
+    <div class="l__wrapper {style.container} l--scroll-auto">
+      <div>
+        <span class="delta">Locations</span>
+        <g:ListBox ui:field='documentListBox' visibleItemCount='5' />
       </div>
-      <g:Button ui:field='dismissButton' styleName="l--float-right" />
-    </g:HTMLPanel>
-
-  </g:DialogBox>
+      <div class="l--push-top-half">
+        <span class="delta">Project/Iteration</span>
+        <g:InlineLabel ui:field='projectIterationName' />
+      </div>
+      <div>
+        <span class="delta">Document</span>
+        <g:InlineLabel ui:field='docName' />
+      </div>
+      <div class="l--push-top-half">
+        <span class="delta">Source</span>
+        <g:SimplePanel ui:field="sourceTextContainer" />
+      </div>
+      <div class="l--push-left-half">
+        <label>Comments</label>
+        <g:TextBox readOnly="true" ui:field="sourceComment" />
+      </div>
+      <div class="l--push-top-half">
+        <span class="delta">Target</span>
+        <g:SimplePanel ui:field="targetTextContainer" />
+      </div>
+      <div class="l--push-left-half">
+        <label>Comments</label>
+        <g:TextBox ui:field='targetComment' readOnly="true" />
+      </div>
+      <div>
+        <label>Content State</label>
+        <g:TextBox ui:field='targetState' readOnly="true" />
+      </div>
+      <div>
+        <g:InlineLabel ui:field='lastModified' />
+      </div>
+    </div>
+  </g:HTMLPanel>
 </ui:UiBinder>
