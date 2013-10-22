@@ -41,13 +41,16 @@ import org.zanata.dao.PersonDAO;
 import org.zanata.dao.ProjectDAO;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.dao.TextFlowTargetDAO;
+import org.zanata.dao.VersionGroupDAO;
 import org.zanata.exception.ZanataServiceException;
+import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlowTarget;
 import org.zanata.service.LocaleService;
 
+import com.google.common.collect.Sets;
 import com.ibm.icu.util.ULocale;
 
 /**
@@ -65,6 +68,8 @@ public class LocaleServiceImpl implements LocaleService {
 
     private PersonDAO personDAO;
 
+    private VersionGroupDAO versionGroupDAO;
+
     private TextFlowTargetDAO textFlowTargetDAO;
 
     @Logger
@@ -75,12 +80,13 @@ public class LocaleServiceImpl implements LocaleService {
 
     public LocaleServiceImpl(LocaleDAO localeDAO, ProjectDAO projectDAO,
             ProjectIterationDAO projectIterationDAO, PersonDAO personDAO,
-            TextFlowTargetDAO textFlowTargetDAO) {
+            TextFlowTargetDAO textFlowTargetDAO, VersionGroupDAO versionGroupDAO) {
         setLocaleDAO(localeDAO);
         setProjectDAO(projectDAO);
         setProjectIterationDAO(projectIterationDAO);
         setPersonDAO(personDAO);
         setTextFlowTargetDAO(textFlowTargetDAO);
+        setVersionGroupDAO(versionGroupDAO);
     }
 
     @In
@@ -106,6 +112,11 @@ public class LocaleServiceImpl implements LocaleService {
     @In
     public void setPersonDAO(PersonDAO personDAO) {
         this.personDAO = personDAO;
+    }
+
+    @In
+    public void setVersionGroupDAO(VersionGroupDAO versionGroupDAO) {
+        this.versionGroupDAO = versionGroupDAO;
     }
 
     public List<HLocale> getAllLocales() {
@@ -358,5 +369,14 @@ public class LocaleServiceImpl implements LocaleService {
             String iterationSlug, LocaleId localeId) {
         return textFlowTargetDAO.getLastTranslated(projectSlug, iterationSlug,
                 localeId);
+    }
+
+    @Override
+    public Set<HLocale> getGroupActiveLocales(String slug) {
+        HIterationGroup group = versionGroupDAO.getBySlug(slug);
+        if (group != null) {
+            return group.getActiveLocales();
+        }
+        return Sets.newHashSet();
     }
 }

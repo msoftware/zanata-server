@@ -50,6 +50,15 @@
 
     <div style="clear:both"></div>
 
+    <ul class="list--slat">
+      <ui:repeat value="#{versionGroupHome.loadLocales()}" var="localeItem">
+        <li>
+          <label>#{localeItem.locale.retrieveDisplayName()}</label>
+          <h:selectBooleanCheckbox value="#{localeItem.selected}"/>
+        </li>
+      </ui:repeat>
+    </ul>
+
   </rich:panel>
 
   <div class="actionButtons">
@@ -61,9 +70,8 @@
       value="#{messages['jsf.Update']}"
       action="#{versionGroupHome.update}"
       rendered="#{versionGroupHome.managed}"/>
-    <s:button id="cancel"
+    <h:commandButton id="cancel"
       value="#{messages['jsf.Cancel']}"
-      propagation="none"
       action="#{versionGroupHome.cancel}"/>
   </div>
 

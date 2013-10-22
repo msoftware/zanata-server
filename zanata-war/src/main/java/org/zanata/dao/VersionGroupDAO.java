@@ -23,6 +23,8 @@ package org.zanata.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -69,9 +71,13 @@ public class VersionGroupDAO extends AbstractDAOImpl<HIterationGroup, Long> {
         return query.list();
     }
 
-    public HIterationGroup getBySlug(String slug) {
-        return (HIterationGroup) getSession()
-                .byNaturalId(HIterationGroup.class).using("slug", slug).load();
+    public HIterationGroup getBySlug(@Nonnull String slug) {
+        if (!StringUtils.isEmpty(slug)) {
+            return (HIterationGroup) getSession()
+                    .byNaturalId(HIterationGroup.class).using("slug", slug)
+                    .load();
+        }
+        return null;
     }
 
     public List<HPerson> getMaintainerBySlug(String slug) {
