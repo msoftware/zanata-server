@@ -43,6 +43,7 @@ import org.zanata.common.EntityStatus;
 import org.zanata.common.LocaleId;
 import org.zanata.common.TransUnitCount;
 import org.zanata.common.TransUnitWords;
+import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.StatusCount;
@@ -133,22 +134,7 @@ public class ProjectIterationDAO extends
     public TransUnitWords getWordStatsForContainer(Long iterationId,
             LocaleId localeId) {
 
-        Query q =
-                getSession()
-                        .createQuery(
-                                "select new org.zanata.model.StatusCount(tft.state, "
-                                        + "sum(tft.textFlow.wordCount)) "
-                                        + "from HTextFlowTarget tft "
-                                        + "where tft.textFlow.document.projectIteration.id = :id "
-                                        + "  and tft.locale.localeId = :locale"
-                                        + " and tft.textFlow.obsolete = false"
-                                        + " and tft.textFlow.document.obsolete = false"
-                                        + " group by tft.state");
-        q.setParameter("id", iterationId).setParameter("locale", localeId);
-        q.setCacheable(true).setComment(
-                "ProjectIterationDAO.getWordStatsForContainer");
-        @SuppressWarnings("unchecked")
-        List<StatusCount> stats = q.list();
+        List<StatusCount> stats = getWordStatusCount(iterationId, localeId);
 
         TransUnitWords stat = new TransUnitWords();
 
@@ -164,12 +150,56 @@ public class ProjectIterationDAO extends
         return stat;
     }
 
+    public WordsStatistic
+    getWordStatistic(Long iterationId, LocaleId localeId) {
+
+        List<StatusCount> stats = getWordStatusCount(iterationId, localeId);
+
+        WordsStatistic wordsStatistic = new WordsStatistic();
+
+        for (StatusCount count : stats) {
+            wordsStatistic.set(count.status, count.count.intValue());
+        }
+
+        Long totalCount = getTotalWordCountForIteration(iterationId);
+
+        wordsStatistic.set(
+                ContentState.New,
+                totalCount.intValue()
+                        - (wordsStatistic.getApproved() + wordsStatistic
+                                .getNeedReview()));
+
+        return wordsStatistic;
+    }
+
+    private List<StatusCount> getWordStatusCount(Long iterationId,
+            LocaleId localeId) {
+        Query q =
+                getSession()
+                        .createQuery(
+                                "select new org.zanata.model.StatusCount(tft.state, "
+                                        + "sum(tft.textFlow.wordCount)) "
+                                        + "from HTextFlowTarget tft "
+                                        + "where tft.textFlow.document.projectIteration.id = :id "
+                                        + "  and tft.locale.localeId = :locale"
+                                        + " and tft.textFlow.obsolete = false"
+                                        + " and tft.textFlow.document.obsolete = false"
+                                        + " group by tft.state");
+        q.setParameter("id", iterationId).setParameter("locale", localeId);
+        q.setCacheable(true)
+                .setComment("ProjectIterationDAO.getWordStatistic");
+        @SuppressWarnings("unchecked")
+        List<StatusCount> stats = q.list();
+
+        return stats;
+    }
+
     public EntityTag getResourcesETag(HProjectIteration projectIteration) {
         Query q =
                 getSession().createQuery(
                         "select d.revision from HDocument d "
-                            + "where d.projectIteration =:iteration "
-                            + "and d.obsolete = false").setParameter(
+                                + "where d.projectIteration =:iteration "
+                                + "and d.obsolete = false").setParameter(
                         "iteration", projectIteration);
         q.setCacheable(true).setComment("ProjectIterationDAO.getResourcesETag");
         @SuppressWarnings("unchecked")
@@ -236,7 +266,7 @@ public class ProjectIterationDAO extends
 
     /**
      * Retreives translation unit level statistics for a project iteration.
-     *
+     * 
      * @param iterationId
      *            The numeric id for a Project iteration.
      * @return A map of translation unit counts indexed by a locale id string.

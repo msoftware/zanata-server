@@ -38,12 +38,10 @@ import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.zanata.cache.CacheWrapper;
 import org.zanata.cache.EhcacheWrapper;
-import org.zanata.common.AbstractTranslationCount;
 import org.zanata.common.LocaleId;
-import org.zanata.common.TransUnitWords;
+import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.events.TextFlowTargetStateEvent;
-import org.zanata.rest.dto.stats.TranslationStatistics;
 import org.zanata.service.VersionStateCache;
 
 import com.google.common.cache.CacheLoader;
@@ -61,8 +59,8 @@ public class VersionStateCacheImpl implements VersionStateCache {
 
     private CacheManager cacheManager;
 
-    private CacheWrapper<VersionLocaleKey, AbstractTranslationCount> versionStatisticCache;
-    private CacheLoader<VersionLocaleKey, AbstractTranslationCount> versionStatisticLoader;
+    private CacheWrapper<VersionLocaleKey, WordsStatistic> versionStatisticCache;
+    private CacheLoader<VersionLocaleKey, WordsStatistic> versionStatisticLoader;
 
     public VersionStateCacheImpl() {
         // constructor for Seam
@@ -87,7 +85,7 @@ public class VersionStateCacheImpl implements VersionStateCache {
     public void textFlowStateUpdated(TextFlowTargetStateEvent event) {
         VersionLocaleKey key =
                 new VersionLocaleKey(event.getVersionId(), event.getLocaleId());
-        AbstractTranslationCount stats = versionStatisticCache.get(key);
+        WordsStatistic stats = versionStatisticCache.get(key);
 
         if (stats != null) {
             stats.decrement(event.getPreviousState(), 1);
@@ -97,14 +95,14 @@ public class VersionStateCacheImpl implements VersionStateCache {
     }
 
     @Override
-    public AbstractTranslationCount getVersionStatistic(Long versionId,
-            LocaleId localeId) {
+    public WordsStatistic
+            getVersionStatistic(Long versionId, LocaleId localeId) {
         return versionStatisticCache.getWithLoader(new VersionLocaleKey(
                 versionId, localeId));
     }
 
     private static class VersionStatisticLoader extends
-            CacheLoader<VersionLocaleKey, AbstractTranslationCount> {
+            CacheLoader<VersionLocaleKey, WordsStatistic> {
 
         ProjectIterationDAO getProjectIterationDAO() {
             return (ProjectIterationDAO) Component
@@ -112,16 +110,13 @@ public class VersionStateCacheImpl implements VersionStateCache {
         }
 
         @Override
-        public AbstractTranslationCount load(VersionLocaleKey key)
-                throws Exception {
+        public WordsStatistic load(VersionLocaleKey key) throws Exception {
 
-            TransUnitWords transUnitWords =
-                    getProjectIterationDAO().getWordStatsForContainer(
+            WordsStatistic wordsStatistic =
+                    getProjectIterationDAO().getWordStatistic(
                             key.getVersionId(), key.getLocaleId());
 
-//            return new AbstractTranslationCount(transUnitWords, key.getLocaleId()
-//                    .getId());
-            return null; //TODO: Create new stats modal (memory efficiency).
+            return wordsStatistic;
         }
     }
 

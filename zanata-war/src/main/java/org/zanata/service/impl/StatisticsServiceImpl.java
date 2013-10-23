@@ -34,6 +34,7 @@ import org.zanata.common.ContentState;
 import org.zanata.common.LocaleId;
 import org.zanata.common.TransUnitCount;
 import org.zanata.common.TransUnitWords;
+import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.dao.DocumentDAO;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.model.HDocument;
@@ -56,7 +57,7 @@ import org.zanata.webtrans.shared.model.DocumentStatus;
  * Default implementation for the
  * {@link org.zanata.rest.service.StatisticsResource} interface. This is a
  * business/REST service.
- *
+ * 
  * @author Carlos Munoz <a
  *         href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
@@ -363,7 +364,7 @@ public class StatisticsServiceImpl implements StatisticsResource {
         return result;
     }
 
-    public TranslationStatistics getVersionLocaleStatistic(Long versionId,
+    public WordsStatistic getVersionLocaleStatistic(Long versionId,
             LocaleId localeId) {
         return versionStateCacheImpl.getVersionStatistic(versionId, localeId);
     }

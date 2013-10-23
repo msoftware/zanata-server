@@ -5,22 +5,17 @@
   xmlns:s="http://jboss.org/schema/seam/taglib">
 
   <div class="prop">
-
-    <s:label styleClass="name #{invalid?'errors':''}">
+    <s:label styleClass="name #{invalid?'txt--danger':''}">
+      <s:span rendered="#{required}">*</s:span>
       <ui:insert name="label"/>
-      <s:span styleClass="required" rendered="#{required}">*</s:span>
+      <s:message styleClass="l--push-left-1"/>
     </s:label>
 
-        <span class="value #{invalid?'errors':''}">
-            <s:validateAll>
-              <ui:insert/>
-            </s:validateAll>
-        </span>
-
-        <span class="value #{invalid?'errors':''} errorsMessage">
-        <s:span styleClass="icon-cancel-circle-2 errors" rendered="#{invalid}"/>
-          <s:message styleClass="errors"/>
-        </span>
+    <span class="value #{invalid?'txt--danger':''}">
+        <s:validateAll>
+          <ui:insert/>
+        </s:validateAll>
+    </span>
   </div>
 
 </ui:composition>

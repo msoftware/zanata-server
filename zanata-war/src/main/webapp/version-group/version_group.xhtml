@@ -74,8 +74,8 @@
         <a href="#" class="action_link"
           onclick="#{rich:component('versionAddPanel')}.show()">#{messages['jsf.AddProjectVersions']}</a>
 
-        <s:link styleClass="action_link" value="#{messages['jsf.EditGroup']}"
-          view="/version-group/edit.xhtml" propagation="none">
+        <s:link styleClass="action_link" value="#{messages['jsf.Settings']}"
+          view="/version-group/settings.xhtml" propagation="none">
           <f:param name="versionGroupSlug"
             value="#{versionGroupHome.instance.slug}"/>
         </s:link>
