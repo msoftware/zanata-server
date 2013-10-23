@@ -293,10 +293,13 @@ public class TranslationServiceImpl implements TranslationService {
     /**
      * Sends out an event to signal that a Text Flow target has been translated
      */
-    private void signalPostTranslateEvent(HTextFlowTarget hTextFlowTarget) {
+    private void signalPostTranslateEvent(HTextFlowTarget hTextFlowTarget,
+            ContentState oldState) {
         if (Events.exists()) {
             HTextFlow textFlow = hTextFlowTarget.getTextFlow();
-            HDocument document = textFlow.getDocument();
+            Long documentId = textFlow.getDocument().getId();
+            Long versionId =
+                    textFlow.getDocument().getProjectIteration().getId();
             // TODO remove hasError from DocumentStatus, so that we can pass
             // everything else directly to cache
             // DocumentStatus docStatus = new DocumentStatus(
@@ -304,14 +307,12 @@ public class TranslationServiceImpl implements TranslationService {
             // hTextFlowTarget.getLastChanged(),
             // hTextFlowTarget.getLastModifiedBy().getAccount().getUsername());
 
-            Events.instance()
-                    .raiseTransactionSuccessEvent(
-                            TextFlowTargetStateEvent.EVENT_NAME,
-                            new TextFlowTargetStateEvent(document.getId(),
-                                    textFlow.getId(), hTextFlowTarget
-                                            .getLocale().getLocaleId(),
-                                    hTextFlowTarget.getId(), hTextFlowTarget
-                                            .getState()));
+            Events.instance().raiseTransactionSuccessEvent(
+                    TextFlowTargetStateEvent.EVENT_NAME,
+                    new TextFlowTargetStateEvent(versionId, documentId,
+                            textFlow.getId(), hTextFlowTarget.getLocale()
+                                    .getLocaleId(), hTextFlowTarget.getId(),
+                            hTextFlowTarget.getState(), oldState));
         }
     }
 
@@ -319,6 +320,7 @@ public class TranslationServiceImpl implements TranslationService {
             @Nonnull List<String> contentsToSave, ContentState requestedState,
             int nPlurals, Boolean requireTranslationReview) {
         boolean targetChanged = false;
+        ContentState currentState = hTextFlowTarget.getState();
         targetChanged |= setContentIfChanged(hTextFlowTarget, contentsToSave);
         targetChanged |=
                 setContentStateIfChanged(requestedState, hTextFlowTarget,
@@ -338,7 +340,7 @@ public class TranslationServiceImpl implements TranslationService {
 
         // fire event after flush
         if (targetChanged || hTextFlowTarget.getVersionNum() == 0) {
-            this.signalPostTranslateEvent(hTextFlowTarget);
+            this.signalPostTranslateEvent(hTextFlowTarget, currentState);
         }
 
         return targetChanged;
@@ -659,6 +661,7 @@ public class TranslationServiceImpl implements TranslationService {
                                 HTextFlowTarget hTarget =
                                         textFlowTargetDAO.getTextFlowTarget(
                                                 textFlow, hLocale);
+                                ContentState currentState = hTarget.getState();
 
                                 if (mergeType == MergeType.IMPORT) {
                                     removedTargets.remove(hTarget);
@@ -713,7 +716,7 @@ public class TranslationServiceImpl implements TranslationService {
                                     }
                                     textFlowTargetDAO.makePersistent(hTarget);
                                 }
-                                signalPostTranslateEvent(hTarget);
+                                signalPostTranslateEvent(hTarget, currentState);
                             }
 
                             personDAO.flush();

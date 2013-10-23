@@ -48,6 +48,7 @@ import org.zanata.rest.dto.stats.TranslationStatistics.StatUnit;
 import org.zanata.rest.service.StatisticsResource;
 import org.zanata.rest.service.ZPathService;
 import org.zanata.service.TranslationStateCache;
+import org.zanata.service.VersionStateCache;
 import org.zanata.util.DateUtil;
 import org.zanata.webtrans.shared.model.DocumentStatus;
 
@@ -76,6 +77,9 @@ public class StatisticsServiceImpl implements StatisticsResource {
 
     @In
     private TranslationStateCache translationStateCacheImpl;
+
+    @In
+    private VersionStateCache versionStateCacheImpl;
 
     // TODO Need to refactor this method to get Message statistic by default.
     // This is to be consistance with UI which uses message stats, and for
@@ -346,16 +350,21 @@ public class StatisticsServiceImpl implements StatisticsResource {
         TranslationStatistics wordStatistics =
                 result.getStats(localeId.getId(), StatUnit.WORD);
 
-        double remainingHours =
-                getRemainingHours(wordStatistics.getDraft(),
-                        wordStatistics.getUntranslated());
+        // double remainingHours =
+        // getRemainingHours(wordStatistics.getDraft(),
+        // wordStatistics.getUntranslated());
 
-        wordStatistics.setRemainingHours(remainingHours);
+        // wordStatistics.setRemainingHours(remainingHours);
 
         TranslationStatistics msgStatistics =
                 result.getStats(localeId.getId(), StatUnit.MESSAGE);
-        msgStatistics.setRemainingHours(remainingHours);
+        msgStatistics.setRemainingHours(wordStatistics.getRemainingHours());
 
         return result;
+    }
+
+    public TranslationStatistics getVersionLocaleStatistic(Long versionId,
+            LocaleId localeId) {
+        return versionStateCacheImpl.getVersionStatistic(versionId, localeId);
     }
 }

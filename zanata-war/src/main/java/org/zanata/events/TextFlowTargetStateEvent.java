@@ -36,9 +36,11 @@ public final class TextFlowTargetStateEvent {
     public static final String EVENT_NAME =
             "org.zanata.event.HTextFlowTranslated";
 
+    private final Long versionId;
     private final Long documentId;
     private final Long textFlowId;
     private final LocaleId localeId;
     private final Long textFlowTargetId;
     private final ContentState newState;
+    private final ContentState previousState;
 }
