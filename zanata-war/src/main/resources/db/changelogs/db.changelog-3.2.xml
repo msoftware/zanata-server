@@ -29,9 +29,9 @@
                   http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
   <changeSet id="1" author="aeng@redhat.com">
-    <comment>Create HIterationGroup_Locale table</comment>
+    <comment>Create IterationGroup_Locale table</comment>
 
-    <createTable tableName="HIterationGroup_Locale">
+    <createTable tableName="IterationGroup_Locale">
       <column name="iteration_group_id" type="bigint">
         <constraints nullable="false" />
       </column>
@@ -40,18 +40,18 @@
       </column>
     </createTable>
 
-    <addPrimaryKey tableName = "HIterationGroup_Locale"
+    <addPrimaryKey tableName = "IterationGroup_Locale"
       columnNames = "iteration_group_id, locale_id"/>
     <addForeignKeyConstraint
-      baseTableName = "HIterationGroup_Locale"
+      baseTableName = "IterationGroup_Locale"
       baseColumnNames = "iteration_group_id"
-      constraintName = "FK_HIterationGroup_Locale_HIterationGroup"
+      constraintName = "FK_IterationGroup_Locale_HIterationGroup"
       referencedTableName = "HIterationGroup"
       referencedColumnNames = "id"/>
     <addForeignKeyConstraint
-      baseTableName = "HIterationGroup_Locale"
+      baseTableName = "IterationGroup_Locale"
       baseColumnNames = "locale_id"
-      constraintName = "FK_HIterationGroup_Locale_HLocale"
+      constraintName = "FK_IterationGroup_Locale_HLocale"
       referencedTableName = "HLocale"
       referencedColumnNames = "id"/>
   </changeSet>

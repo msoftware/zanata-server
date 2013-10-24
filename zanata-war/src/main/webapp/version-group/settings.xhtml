@@ -19,45 +19,63 @@
       </div>
     </div>
 
-    <div class="l--push-v-1 l--constrain-large">
-      <div class="tabs--vertical js-tabs">
-        <ul class="tabs__nav js-tabs-nav">
-          <li class="is-active">
-            <a href="#tab-vertical-1">
-              <i class="i i--settings"></i>
-              <span class="is-hidden--s">#{messages['jsf.General']}</span>
-            </a>
-          </li>
-          <li>
-            <a href="#tab-vertical-2">
-              <i class="i i--maintain"></i>
-              <span class="is-hidden--s">#{messages['jsf.Maintainers']}</span>
-            </a>
-          </li>
-          <li><a href="#tab-vertical-3"><i class="i i--language"></i> <span
-            class="is-hidden--s">#{messages['jsf.Languages']}</span></a></li>
-        </ul>
+    <div class="l--push-v-1 l--constrain-medium">
+      <h:form>
+        <s:token allowMultiplePosts="true"/>
 
-        <ul class="tabs__content js-tabs-content">
-          <li class="is-active" id="tab-vertical-1">
-            <ui:include src="../WEB-INF/layout/version_group_edit_form.xhtml"/>
-          </li>
-          <li id="tab-vertical-2">
-            Maintainer
-          </li>
-          <li id="tab-vertical-3">
-            <ul class="list--slat">
-              <ui:repeat value="#{versionGroupHome.loadLocales()}"
-                var="localeItem">
-                <li>
-                  <label>#{localeItem.locale.retrieveDisplayName()}</label>
-                  <h:selectBooleanCheckbox value="#{localeItem.selected}"/>
-                </li>
-              </ui:repeat>
-            </ul>
-          </li>
-        </ul>
-      </div>
+        <div class="tabs--vertical js-tabs">
+          <ul class="tabs__nav js-tabs-nav">
+            <li class="is-active">
+              <a href="#tab-general">
+                <i class="i i--settings"></i>
+                <span class="is-hidden--s">#{messages['jsf.General']}</span>
+              </a>
+            </li>
+            <li>
+              <a href="#tab-maintainers">
+                <i class="i i--maintain"></i>
+                <span class="is-hidden--s">#{messages['jsf.Maintainers']}</span>
+              </a>
+            </li>
+            <li><a href="#tab-languages"><i class="i i--language"></i> <span
+              class="is-hidden--s">#{messages['jsf.Languages']}</span></a></li>
+          </ul>
+
+          <ul class="tabs__content js-tabs-content">
+            <li class="is-active" id="tab-general">
+              <ui:include
+                src="../WEB-INF/layout/version_group_edit_form.xhtml"/>
+            </li>
+            <li id="tab-maintainers">
+              <ui:include src="maintainers.xhtml"/>
+            </li>
+            <li id="tab-languages">
+              <ul class="list--slat">
+                <ui:repeat value="#{versionGroupHome.getActiveLocales()}"
+                  var="localeItem">
+                  <li>
+                    <label>#{localeItem.locale.retrieveDisplayName()}
+                      <h:selectBooleanCheckbox value="#{localeItem.selected}"/>
+                    </label>
+                  </li>
+                </ui:repeat>
+              </ul>
+            </li>
+          </ul>
+
+          <div class="l--push-top-1 txt--align-right">
+            <h:commandButton id="save"
+              value="#{messages['jsf.Save']}"
+              action="#{versionGroupHome.update}"
+              rendered="#{versionGroupHome.managed}"
+              styleClass="l--push-right-half button--primary"/>
+            <h:commandButton id="cancel"
+              value="#{messages['jsf.Cancel']}"
+              action="#{versionGroupHome.cancel}"/>
+          </div>
+
+        </div>
+      </h:form>
     </div>
   </ui:define>
 

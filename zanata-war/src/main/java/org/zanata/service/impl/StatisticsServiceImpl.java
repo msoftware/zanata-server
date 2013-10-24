@@ -30,11 +30,9 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.zanata.common.ContentState;
 import org.zanata.common.LocaleId;
 import org.zanata.common.TransUnitCount;
 import org.zanata.common.TransUnitWords;
-import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.dao.DocumentDAO;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.model.HDocument;
@@ -49,15 +47,15 @@ import org.zanata.rest.dto.stats.TranslationStatistics.StatUnit;
 import org.zanata.rest.service.StatisticsResource;
 import org.zanata.rest.service.ZPathService;
 import org.zanata.service.TranslationStateCache;
-import org.zanata.service.VersionStateCache;
 import org.zanata.util.DateUtil;
+import org.zanata.util.StatisticsUtil;
 import org.zanata.webtrans.shared.model.DocumentStatus;
 
 /**
  * Default implementation for the
  * {@link org.zanata.rest.service.StatisticsResource} interface. This is a
  * business/REST service.
- * 
+ *
  * @author Carlos Munoz <a
  *         href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
@@ -78,9 +76,6 @@ public class StatisticsServiceImpl implements StatisticsResource {
 
     @In
     private TranslationStateCache translationStateCacheImpl;
-
-    @In
-    private VersionStateCache versionStateCacheImpl;
 
     // TODO Need to refactor this method to get Message statistic by default.
     // This is to be consistance with UI which uses message stats, and for
@@ -167,9 +162,8 @@ public class StatisticsServiceImpl implements StatisticsResource {
             TranslationStatistics transUnitStats =
                     getMessageStats(count, locId, lastModifiedDate,
                             lastModifiedBy);
-            transUnitStats.setRemainingHours(getRemainingHours(
-                    wordCount.get(ContentState.NeedReview),
-                    wordCount.get(ContentState.New)));
+            transUnitStats.setRemainingHours(StatisticsUtil
+                    .getRemainingHours(wordCount));
             iterationStats.addStats(transUnitStats);
 
             // word level stats
@@ -177,9 +171,8 @@ public class StatisticsServiceImpl implements StatisticsResource {
                 TranslationStatistics wordsStats =
                         getWordsStats(wordCount, locId, lastModifiedDate,
                                 lastModifiedBy);
-                wordsStats.setRemainingHours(getRemainingHours(
-                        wordCount.get(ContentState.NeedReview),
-                        wordCount.get(ContentState.New)));
+                wordsStats.setRemainingHours(StatisticsUtil
+                        .getRemainingHours(wordCount));
                 iterationStats.addStats(wordsStats);
             }
         }
@@ -267,10 +260,8 @@ public class StatisticsServiceImpl implements StatisticsResource {
                     docStat.getLastTranslatedDate(),
                     docStat.getLastTranslatedBy()));
 
-            transUnitStats
-                    .setRemainingHours(getRemainingHours(
-                            transUnitStats.getDraft(),
-                            transUnitStats.getUntranslated()));
+            transUnitStats.setRemainingHours(StatisticsUtil
+                    .getRemainingHours(transUnitStats));
             docStats.addStats(transUnitStats);
 
             // word level stats
@@ -291,8 +282,8 @@ public class StatisticsServiceImpl implements StatisticsResource {
                         docStat.getLastTranslatedDate(),
                         docStat.getLastTranslatedBy()));
 
-                wordsStats.setRemainingHours(getRemainingHours(
-                        wordsStats.getDraft(), wordsStats.getUntranslated()));
+                wordsStats.setRemainingHours(StatisticsUtil
+                        .getRemainingHours(wordsStats));
                 docStats.addStats(wordsStats);
             }
         }
@@ -336,13 +327,6 @@ public class StatisticsServiceImpl implements StatisticsResource {
         return result.toString();
     }
 
-    private double getRemainingHours(double fuzzy, double untrans) {
-        double untransHours = untrans / 250.0;
-        double fuzzyHours = fuzzy / 500.0;
-        double remainHours = untransHours + fuzzyHours;
-        return remainHours;
-    }
-
     public ContainerTranslationStatistics getDocStatistics(Long documentId,
             LocaleId localeId) {
         ContainerTranslationStatistics result =
@@ -351,21 +335,11 @@ public class StatisticsServiceImpl implements StatisticsResource {
         TranslationStatistics wordStatistics =
                 result.getStats(localeId.getId(), StatUnit.WORD);
 
-        // double remainingHours =
-        // getRemainingHours(wordStatistics.getDraft(),
-        // wordStatistics.getUntranslated());
-
-        // wordStatistics.setRemainingHours(remainingHours);
 
         TranslationStatistics msgStatistics =
                 result.getStats(localeId.getId(), StatUnit.MESSAGE);
         msgStatistics.setRemainingHours(wordStatistics.getRemainingHours());
 
         return result;
-    }
-
-    public WordsStatistic getVersionLocaleStatistic(Long versionId,
-            LocaleId localeId) {
-        return versionStateCacheImpl.getVersionStatistic(versionId, localeId);
     }
 }

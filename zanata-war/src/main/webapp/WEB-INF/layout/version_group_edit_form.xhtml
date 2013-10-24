@@ -1,24 +1,20 @@
-<h:form id="projectForm"
+<s:fragment
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:s="http://jboss.org/schema/seam/taglib"
-  xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:f="http://java.sun.com/jsf/core"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:rich="http://richfaces.org/rich"
   xmlns:a4j="http://richfaces.org/a4j"
   >
-
-  <s:token allowMultiplePosts="true"/>
-
-  <s:decorate id="slugField" template="edit.xhtml" enclose="true">
-    <ui:define name="label">#{messages['jsf.GroupId']}</ui:define>
-    <s:span styleClass="icon-info-circle-2 txt--highlight" id="slugHelp">
-      <rich:tooltip>
-        <em><code>#{messages['jsf.GroupIdExample']}</code></em>
-      </rich:tooltip>
-    </s:span>
+  <h:outputLabel for="slug">#{messages['jsf.GroupId']}</h:outputLabel>
+  <s:span styleClass="icon-info-circle-2 txt--highlight" id="slugHelp">
+    <rich:tooltip>
+      <em><code>#{messages['jsf.GroupIdExample']}</code></em>
+    </rich:tooltip>
+  </s:span>
+  <s:decorate id="slugField" template="field.xhtml" enclose="true">
     <h:inputText rendered="#{versionGroupHome.managed}"
-      readonly="true"
+      disabled="true"
       value="#{versionGroupHome.instance.slug}">
     </h:inputText>
     <h:inputText rendered="#{not versionGroupHome.managed}"
@@ -29,40 +25,26 @@
     </h:inputText>
   </s:decorate>
 
-  <s:decorate id="nameField" template="edit.xhtml" enclose="true">
-    <ui:define name="label">#{messages['jsf.Name']}</ui:define>
+  <h:outputLabel for="name">#{messages['jsf.Name']}</h:outputLabel>
+  <s:span styleClass="txt--required">*</s:span>
+  <s:decorate id="nameField" template="field.xhtml" enclose="true">
     <h:inputText id="name" required="true"
       value="#{versionGroupHome.instance.name}">
       <a4j:ajax event="blur" render="nameField" execute="@this"/>
     </h:inputText>
   </s:decorate>
 
-  <s:decorate id="descriptionField" template="edit.xhtml">
-    <ui:define name="label">#{messages['jsf.Description']}</ui:define>
+  <h:outputLabel
+    for="description">#{messages['jsf.Description']}</h:outputLabel>
+  <s:decorate id="descriptionField" template="field.xhtml">
     <h:inputText id="description" required="false"
-      value="#{versionGroupHome.instance.description}" style="width:400px;"/>
+      value="#{versionGroupHome.instance.description}"/>
   </s:decorate>
 
-  <s:decorate id="statusField" template="edit.xhtml">
-    <ui:define name="label">#{messages['jsf.Status']}</ui:define>
-    <h:selectOneMenu value="#{versionGroupHome.instance.status}">
+  <h:outputLabel for="status">#{messages['jsf.Status']}</h:outputLabel>
+  <s:decorate id="statusField" template="field.xhtml">
+    <h:selectOneRadio value="#{versionGroupHome.instance.status}" id="status">
       <f:selectItems value="#{versionGroupHome.statusList}"/>
-    </h:selectOneMenu>
+    </h:selectOneRadio>
   </s:decorate>
-
-  <div class="l--push-top-1 txt--align-right">
-    <h:commandButton id="save"
-      value="#{messages['jsf.Save']}"
-      action="#{versionGroupHome.persist}"
-      rendered="#{!versionGroupHome.managed}"
-      styleClass="l--push-right-half button--primary"/>
-    <h:commandButton id="update"
-      value="#{messages['jsf.Update']}"
-      action="#{versionGroupHome.update}"
-      rendered="#{versionGroupHome.managed}"
-      styleClass="l--push-right-half button--primary"/>
-    <h:commandButton id="cancel"
-      value="#{messages['jsf.Cancel']}"
-      action="#{versionGroupHome.cancel}"/>
-  </div>
-</h:form>
+</s:fragment>

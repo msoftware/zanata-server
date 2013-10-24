@@ -21,6 +21,7 @@
 package org.zanata.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -41,10 +42,13 @@ import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
+import org.zanata.common.LocaleId;
+import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
+import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
 import org.zanata.service.SlugEntityService;
 
@@ -69,10 +73,13 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     HAccount authenticatedAccount;
 
     @In
-    SlugEntityService slugEntityServiceImpl;
+    private SlugEntityService slugEntityServiceImpl;
 
     @In
-    LocaleService localeServiceImpl;
+    private LocaleService localeServiceImpl;
+
+    @In
+    private GroupStatisticService groupStatisticServiceImpl;
 
     @Logger
     Log log;
@@ -161,7 +168,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return getAvailableStatus();
     }
 
-    public List<LocaleItem> loadLocales() {
+    public List<LocaleItem> getActiveLocales() {
         if (activeLocales == null) {
             activeLocales = Lists.newArrayList();
 
@@ -179,15 +186,18 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 }
             }
         }
+        Collections.sort(activeLocales);
         return activeLocales;
     }
 
     private void updateActiveLocales() {
-        getInstance().getActiveLocales().clear();
-
-        for (LocaleItem localeItem : activeLocales) {
-            if (localeItem.isSelected()) {
-                getInstance().getActiveLocales().add(localeItem.getLocale());
+        if (activeLocales != null) {
+            getInstance().getActiveLocales().clear();
+            for (LocaleItem localeItem : activeLocales) {
+                if (localeItem.isSelected()) {
+                    getInstance().getActiveLocales()
+                            .add(localeItem.getLocale());
+                }
             }
         }
     }
@@ -207,8 +217,13 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return statusList;
     }
 
+    public WordsStatistic getStatisticForLocale(LocaleId localeId) {
+        return groupStatisticServiceImpl.getLocaleStatistic(
+                getInstanceProjectIterations(), localeId);
+    }
+
     @AllArgsConstructor
-    public final class LocaleItem {
+    public final class LocaleItem implements Comparable<LocaleItem> {
         @Getter
         @Setter
         private boolean selected;
@@ -216,5 +231,11 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         @Getter
         @Setter
         private HLocale locale;
+
+        @Override
+        public int compareTo(LocaleItem localeItem) {
+            return this.getLocale().retrieveDisplayName()
+                    .compareTo(localeItem.getLocale().retrieveDisplayName());
+        }
     }
 }

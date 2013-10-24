@@ -421,59 +421,23 @@
 
   <page view-id="/version-group/settings.xhtml" login-required="true">
     <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-    <action
-      execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
-
-    <navigation from-action="#{versionGroupHome.update}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-    <navigation from-action="#{versionGroupHome.cancel}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-  </page>
-
-  <page view-id="/version-group/edit.xhtml" login-required="true">
-    <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-    <action
-      execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
-
-    <action execute="#{breadcrumbs.clear}" />
-    <action
-      execute="#{breadcrumbs.addLocation('/version-group/home.xhtml', messages['jsf.Groups'])}" />
-    <action
-      execute="#{breadcrumbs.addLocation('/version-group/version_group.xhtml', versionGroupHome.slug).param('versionGroupSlug', versionGroupHome.slug)}" />
-    <action
-      execute="#{breadcrumbs.addLocation('', messages['jsf.EditGroup'])}" />
-
-    <navigation from-action="#{versionGroupHome.update}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-    <navigation from-action="#{versionGroupHome.cancel}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-  </page>
-
-  <page view-id="/version-group/assign_maintainer.xhtml">
     <param name="versionGroupSlug"
-      value="#{versionGroupMaintainerManageAction.slug}" />
-    <action execute="#{versionGroupMaintainerManageAction.init()}" />
+      value="#{versionGroupMaintainerAction.slug}" />
+    <action
+      execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
 
-    <action execute="#{breadcrumbs.clear}" />
-    <action
-      execute="#{breadcrumbs.addLocation('/version-group/home.xhtml', messages['jsf.Groups'])}" />
-    <action
-      execute="#{breadcrumbs.addLocation('/version-group/version_group.xhtml', versionGroupMaintainerManageAction.slug).param('versionGroupSlug', versionGroupMaintainerManageAction.slug)}" />
-    <action
-      execute="#{breadcrumbs.addLocation('', messages['jsf.ManageMaintainers'])}" />
+    <action execute="#{versionGroupMaintainerAction.init()}" />
 
+    <navigation from-action="#{versionGroupHome.update}">
+      <redirect view-id="/version-group/version_group.xhtml">
+        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
+      </redirect>
+    </navigation>
+    <navigation from-action="#{versionGroupHome.cancel}">
+      <redirect view-id="/version-group/version_group.xhtml">
+        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
+      </redirect>
+    </navigation>
   </page>
 
   <page view-id="/version-group/request_to_join.xhtml">

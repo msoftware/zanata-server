@@ -73,7 +73,7 @@ public class HIterationGroup extends SlugEntityBase implements HasEntityStatus {
     private Set<HProjectIteration> projectIterations = Sets.newHashSet();
 
     @ManyToMany
-    @JoinTable(name = "HIterationGroup_Locale", joinColumns = @JoinColumn(
+    @JoinTable(name = "IterationGroup_Locale", joinColumns = @JoinColumn(
             name = "iteration_group_id"), inverseJoinColumns = @JoinColumn(
             name = "locale_id"))
     private Set<HLocale> activeLocales = Sets.newHashSet();

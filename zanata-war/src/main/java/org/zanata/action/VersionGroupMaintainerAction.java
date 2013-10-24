@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -20,43 +22,39 @@ import org.zanata.model.HIterationGroup;
 import org.zanata.model.HPerson;
 import org.zanata.service.VersionGroupService;
 
-@Name("versionGroupMaintainerManageAction")
+@Name("versionGroupMaintainerAction")
 @Scope(ScopeType.PAGE)
-public class VersionGroupMaintainerManageAction implements Serializable {
+public class VersionGroupMaintainerAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @DataModel
-    List<HPerson> allList;
+    private List<HPerson> maintainerList;
 
     @DataModelSelection
     HPerson selectedPerson;
 
+    @Getter
+    @Setter
     private String slug;
+
     private HIterationGroup group;
 
     @In
     private VersionGroupService versionGroupServiceImpl;
 
     @In
-    AccountDAO accountDAO;
+    private AccountDAO accountDAO;
 
     @Logger
     Log log;
 
     public void init() {
-        allList = versionGroupServiceImpl.getMaintainerBySlug(slug);
+        maintainerList = versionGroupServiceImpl.getMaintainerBySlug(slug);
     }
+
 
     public HPerson getSelectedPerson() {
         return this.selectedPerson;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
-
-    public String getSlug() {
-        return slug;
     }
 
     @Restrict("#{s:hasPermission(versionGroupMaintainerManageAction.group,'update')}")

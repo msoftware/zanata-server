@@ -150,8 +150,7 @@ public class ProjectIterationDAO extends
         return stat;
     }
 
-    public WordsStatistic
-    getWordStatistic(Long iterationId, LocaleId localeId) {
+    public WordsStatistic getWordStatistic(Long iterationId, LocaleId localeId) {
 
         List<StatusCount> stats = getWordStatusCount(iterationId, localeId);
 
@@ -163,12 +162,12 @@ public class ProjectIterationDAO extends
 
         Long totalCount = getTotalWordCountForIteration(iterationId);
 
-        wordsStatistic.set(
-                ContentState.New,
-                totalCount.intValue()
-                        - (wordsStatistic.getApproved() + wordsStatistic
-                                .getNeedReview()));
-
+        wordsStatistic
+                .set(ContentState.New,
+                    totalCount.intValue()
+                        - (wordsStatistic.getApproved()
+                        + wordsStatistic.getTranslated() + wordsStatistic
+                        .getDraft()));
         return wordsStatistic;
     }
 
@@ -186,8 +185,7 @@ public class ProjectIterationDAO extends
                                         + " and tft.textFlow.document.obsolete = false"
                                         + " group by tft.state");
         q.setParameter("id", iterationId).setParameter("locale", localeId);
-        q.setCacheable(true)
-                .setComment("ProjectIterationDAO.getWordStatistic");
+        q.setCacheable(true).setComment("ProjectIterationDAO.getWordStatistic");
         @SuppressWarnings("unchecked")
         List<StatusCount> stats = q.list();
 
@@ -266,7 +264,7 @@ public class ProjectIterationDAO extends
 
     /**
      * Retreives translation unit level statistics for a project iteration.
-     * 
+     *
      * @param iterationId
      *            The numeric id for a Project iteration.
      * @return A map of translation unit counts indexed by a locale id string.

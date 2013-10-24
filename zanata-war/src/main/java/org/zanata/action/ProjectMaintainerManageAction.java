@@ -65,9 +65,9 @@ public class ProjectMaintainerManageAction implements Serializable {
 
     @Restrict("#{s:hasPermission(projectMaintainerManageAction.project, 'update')}")
     public
-            void deleteMaintainer(HPerson person) {
+    void deleteMaintainer(HPerson person) {
         log.debug("try to delete maintainer {0} from slug {1}",
-                person.getName(), this.slug);
+            person.getName(), this.slug);
         final HProject project = projectDAO.getBySlug(this.slug);
         Set<HPerson> personList = project.getMaintainers();
         for (HPerson l : personList) {
@@ -88,7 +88,7 @@ public class ProjectMaintainerManageAction implements Serializable {
 
     @Restrict("#{s:hasPermission(projectMaintainerManageAction.project, 'update')}")
     public
-            String addMaintainers(String account) {
+    String addMaintainers(String account) {
         HAccount a = accountDAO.getByUsername(account);
         if (a != null && a.isEnabled()) {
             HProject project = projectDAO.getBySlug(this.slug);
