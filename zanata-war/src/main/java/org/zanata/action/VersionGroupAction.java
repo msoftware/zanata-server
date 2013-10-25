@@ -149,14 +149,14 @@ public class VersionGroupAction implements Serializable {
     }
 
     @Transactional
-    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
     private void joinVersionGroup(Long projectIterationId) {
         versionGroupServiceImpl.joinVersionGroup(group.getSlug(),
                 projectIterationId);
     }
 
     @Transactional
-    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
     public void leaveVersionGroup(Long projectIterationId) {
         versionGroupServiceImpl.leaveVersionGroup(group.getSlug(),
                 projectIterationId);

@@ -1,6 +1,7 @@
 package org.zanata.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordsStatistic;
@@ -11,8 +12,9 @@ import org.zanata.model.HProjectIteration;
  */
 public interface GroupStatisticService {
 
-    WordsStatistic getVersionLocaleStatistic(Long versionId, LocaleId localeId);
+    WordsStatistic getVersionLocaleStatistic(VersionLocaleKey key);
 
-    WordsStatistic getLocaleStatistic(List<HProjectIteration> versionList,
-            LocaleId localeId);
+    Map<VersionLocaleKey, WordsStatistic> getLocaleStatistic(
+        List<HProjectIteration> versionList,
+        LocaleId localeId);
 }

@@ -8,57 +8,67 @@
   xmlns:f="http://java.sun.com/jsf/core">
 
 <composite:interface>
-  <composite:attribute name="statistic"
-    type="org.zanata.common.statistic.WordsStatistic"/>
+  <composite:attribute name="value"
+    type="org.zanata.common.statistic.WordsStatistic" required="true"/>
 </composite:interface>
 <composite:implementation>
+  <s:fragment rendered="#{cc.attrs.value != ''}">
+    <ui:param name="translated" value="#{cc.attrs.value.translated}"/>
+    <ui:param name="fuzzy" value="#{cc.attrs.value.needReview}"/>
+    <ui:param name="rejected" value="#{cc.attrs.value.rejected}"/>
+    <ui:param name="approved" value="#{cc.attrs.value.approved}"/>
+    <ui:param name="untranslated" value="#{cc.attrs.value.untranslated}"/>
+    <ui:param name="remainingHours"
+      value="#{cc.attrs.value.remainingHours}"/>
 
-  <ui:param name="approved" value="#{cc.attrs.statistic.approved}"/>
-  <ui:param name="translated" value="#{cc.attrs.statistic.translated}"/>
-  <ui:param name="draft" value="#{cc.attrs.statistic.draft}"/>
-  <ui:param name="untranslated" value="#{cc.attrs.statistic.untranslated}"/>
+    <ui:param name="total" value="#{cc.attrs.value.total}"/>
 
-  <ui:param name="total" value="#{cc.attrs.statistic.total}"/>
+    <div class="progress-bar">
+      <s:fragment rendered="#{total > 0}">
+        <ui:param name="translated_percentage"
+          value="#{cc.attrs.value.percentTranslated}"/>
+        <ui:param name="fuzzy_percentage"
+          value="#{cc.attrs.value.percentFuzzy}"/>
+        <ui:param name="rejected_percentage"
+          value="#{cc.attrs.value.percentRejected}"/>
+        <ui:param name="approved_percentage"
+          value="#{cc.attrs.value.percentApproved}"/>
+        <ui:param name="untranslated_percentage"
+          value="#{cc.attrs.value.percentUntranslated}"/>
 
-  <ui:param name="wApproved"
-    value="#{total == 0 ? 0 : 110 * approved / total}"/>
-  <ui:param name="wTranslated"
-    value="#{total == 0 ? 0 : 110 * translated / total}"/>
-  <ui:param name="wDraft" value="#{total == 0 ? 0 : 110 * draft / total}"/>
-  <ui:param name="wUntranslated"
-    value="#{total == 0 ? 0 : 110 * untranslated / total}"/>
-
-  <s:fragment rendered="#{total > 0}">
-    <div
-      title="#{messages['jsf.stats.Total']} #{total}, #{messages['jsf.stats.Approved']} #{approved}, #{messages['jsf.stats.Translated']} #{translated}, #{messages['jsf.stats.Draft']} #{draft}, #{messages['jsf.stats.Untranslated']} #{untranslated}"
-      class="translationStatusDiv">
-      <div class="translationStatusBar statusBar_approved"
-        style="width:#{wApproved}px;"></div>
-      <div class="translationStatusBar statusBar_translated"
-        style="width:#{wTranslated}px;"></div>
-      <div class="translationStatusBar statusBar_draft"
-        style="width:#{wDraft}px;"></div>
-      <div class="translationStatusBar statusBar_untranslated"
-        style="width:#{wUntranslated}px;"></div>
-
-        <span class="statusBar_percentage">
-          <h:outputText value="#{cc.attrs.statistic.percentTranslated/100}"
-            rendered="#{total > 0}">
-            <f:convertNumber type="percent"/>
-          </h:outputText>
-          (
-          <h:outputText value="#{cc.attrs.statistic.remainingHours}">
-            <f:convertNumber maxFractionDigits="1"/>
-          </h:outputText>#{messages['jsf.stats.ShortHoursSuffix']}
-          )
+        <span class="progress-bar__translated"
+          title=" #{translated_percentage}% #{messages['jsf.stats.Translated']}"
+          style="width: #{translated_percentage}%;">
+        <span class="is-invisible"> #{messages['jsf.stats.Translated']}</span>
         </span>
+        <span class="progress-bar__fuzzy"
+          title="#{fuzzy_percentage}% #{messages['jsf.stats.Fuzzy']}"
+          style="width: #{fuzzy_percentage}%; margin-left: #{translated_percentage}%;">
+          <span class="is-invisible">#{messages['jsf.stats.Fuzzy']}</span>
+        </span>
+        <span class="progress-bar__rejected"
+          title="#{rejected_percentage}% #{messages['jsf.stats.Rejected']}"
+          style="width: #{rejected_percentage}%; margin-left: #{translated_percentage + fuzzy_percentage}%;">
+          <span class="is-invisible">#{messages['jsf.stats.Rejected']}</span>
+        </span>
+        <span class="progress-bar__approved"
+          title="#{approved_percentage}% #{messages['jsf.stats.Approved']}"
+          style="width: #{approved_percentage}%;">
+          <span class="is-invisible">#{messages['jsf.stats.Approved']}</span>
+        </span>
+        <span class="progress-bar__untranslated"
+          title="#{untranslated_percentage}% #{messages['jsf.stats.Untranslated']}"
+          style="width: #{untranslated_percentage}%; margin-left: #{translated_percentage + fuzzy_percentage + rejected_percentage + approved_percentage}%">
+          <span
+            class="is-invisible">#{messages['jsf.stats.Untranslated']}</span>
+        </span>
+      </s:fragment>
     </div>
   </s:fragment>
 
-  <s:fragment rendered="#{total eq 0}">
-    <div class="statusBar_noContent">
-      <h:outputText value="#{messages['jsf.NoContent']}"/>
-    </div>
+  <s:fragment rendered="#{cc.attrs.value == ''}">
+    <h:outputText value="#{messages['jsf.NoContent']}"/>
   </s:fragment>
+
 </composite:implementation>
 </html>

@@ -22,11 +22,6 @@
 
 package org.zanata.service.impl;
 
-import java.io.Serializable;
-
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import net.sf.ehcache.CacheManager;
 
 import org.jboss.seam.Component;
@@ -42,6 +37,7 @@ import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.events.TextFlowTargetStateEvent;
+import org.zanata.service.VersionLocaleKey;
 import org.zanata.service.VersionStateCache;
 
 import com.google.common.cache.CacheLoader;
@@ -118,17 +114,5 @@ public class VersionStateCacheImpl implements VersionStateCache {
 
             return wordsStatistic;
         }
-    }
-
-    @AllArgsConstructor
-    @EqualsAndHashCode
-    public static final class VersionLocaleKey implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        @Getter
-        private Long versionId;
-
-        @Getter
-        private LocaleId localeId;
     }
 }

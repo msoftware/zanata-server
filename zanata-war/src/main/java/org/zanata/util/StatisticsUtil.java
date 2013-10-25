@@ -25,7 +25,8 @@ public class StatisticsUtil {
 
     public static double getRemainingHours(WordsStatistic wordsStatistic) {
         return getRemainingHours(wordsStatistic.getTranslated(),
-                wordsStatistic.getUntranslated(), wordsStatistic.getDraft());
+                wordsStatistic.getUntranslated(),
+                wordsStatistic.getNeedReview() + wordsStatistic.getRejected());
     }
 
     public static double getRemainingHours(

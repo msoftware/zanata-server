@@ -167,7 +167,7 @@ public class ProjectIterationDAO extends
                     totalCount.intValue()
                         - (wordsStatistic.getApproved()
                         + wordsStatistic.getTranslated() + wordsStatistic
-                        .getDraft()));
+                        .getNeedReview() + wordsStatistic.getRejected()));
         return wordsStatistic;
     }
 

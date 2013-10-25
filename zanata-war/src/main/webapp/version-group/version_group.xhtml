@@ -7,12 +7,11 @@
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:rich="http://richfaces.org/rich"
   xmlns:a4j="http://richfaces.org/a4j"
-  xmlns:richext="http://java.sun.com/jsf/composite/richext"
   xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
   template="../WEB-INF/template/template_2x.xhtml">
 
 <ui:define
-  name="page_title">#{messages['jsf.Groups']}:#{versionGroupHome.instance.name}</ui:define>
+  name="page_title">#{messages['jsf.Groups']}:#{versionGroupHomeAction.instance.name}</ui:define>
 
 <ui:define name="head">
   <!-- Load jQuery -->
@@ -21,9 +20,7 @@
   <script type="text/javascript">
     function submitSearchOnEnter(e) {
       if (e.keyCode == 13) {
-        #{rich:element('searchBtn')}
-      .
-        click();
+        #{rich:element('searchBtn')}.click();
         return false;
       }
     }
@@ -32,11 +29,11 @@
 
 <ui:define name="center_content">
   <h:form id="iterationGroupForm">
-    <s:formattedText value="#{versionGroupHome.instance.description}"
-      rendered="#{!empty versionGroupHome.instance.description}"/>
+    <s:formattedText value="#{versionGroupHomeAction.instance.description}"
+      rendered="#{!empty versionGroupHomeAction.instance.description}"/>
 
     <rich:dataTable id="iterationsDataTable"
-      value="#{versionGroupHome.instanceProjectIterations}"
+      value="#{versionGroupHomeAction.instanceProjectIterations}"
       var="_iteration">
       <rich:column sortBy="#{_iteration.project.slug}">
         <f:facet name="header">#{messages['jsf.ProjectName']}</f:facet>
@@ -54,7 +51,7 @@
         </s:link>
       </rich:column>
       <rich:column
-        rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}"
+        rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}"
         styleClass="centered">
         <f:facet name="header">#{messages['jsf.Actions']}</f:facet>
         <a4j:commandButton value="#{messages['jsf.Remove']}"
@@ -63,14 +60,36 @@
       </rich:column>
     </rich:dataTable>
 
-    <rich:dataTable value="#{versionGroupHome.getActiveLocales()}" var="localeItem">
+    <script type="text/javascript">
+      jQuery(document).ready(function () {
+        #{rich:element('refresh_stats')}.click();
+      });
+    </script>
+
+    <s:fragment rendered="#{versionGroupHomeAction.documentLoaded}">
+      <h:graphicImage value="/images/loading.gif" alt="Loading"/>
+    </s:fragment>
+
+    <a4j:commandButton value="Refresh stats" id="refresh_stats"
+      action="#{versionGroupHomeAction.setDocumentLoaded(true)}" render="stats_table"/>
+
+    #{vesionGroupHome.getOverallTranslatedPercentage()}
+
+    <rich:dataTable value="#{versionGroupHomeAction.getActiveLocales()}"
+      var="localeItem" styleClass="new-zanata" id="stats_table">
       <rich:column>
         <f:facet name="header">Active Locales</f:facet>
         ${localeItem.locale.retrieveDisplayName()}
       </rich:column>
       <rich:column>
         <f:facet name="header">Total Percentage for all versions</f:facet>
-        <zanata:statistic statistic="${versionGroupHome.getStatisticForLocale(localeItem.locale.localeId)}"/>
+        <s:fragment rendered="#{versionGroupHomeAction.documentLoaded}">
+          <zanata:statistic
+            value="${versionGroupHomeAction.getStatisticForLocale(localeItem.locale.localeId)}"/>
+        </s:fragment>
+        <s:fragment rendered="#{!versionGroupHomeAction.documentLoaded}">
+          <h:graphicImage value="/images/loading.gif" alt="Loading"/>
+        </s:fragment>
       </rich:column>
     </rich:dataTable>
   </h:form>
@@ -82,21 +101,21 @@
   <rich:panel id="loggedIn" rendered="#{identity.loggedIn}">
     <f:facet name="header">#{messages['jsf.Actions']}</f:facet>
     <s:fragment
-      rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
+      rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}">
       <a href="#" class="action_link"
         onclick="#{rich:component('versionAddPanel')}.show()">#{messages['jsf.AddProjectVersions']}</a>
 
       <s:link styleClass="action_link" value="#{messages['jsf.Settings']}"
         view="/version-group/settings.xhtml" propagation="none">
         <f:param name="versionGroupSlug"
-          value="#{versionGroupHome.instance.slug}"/>
+          value="#{versionGroupHomeAction.instance.slug}"/>
       </s:link>
 
       <s:link styleClass="action_link"
         view="/version-group/assign_maintainer.xhtml"
         value="#{messages['jsf.ManageMaintainers']}" propagation="none">
         <f:param name="versionGroupSlug"
-          value="#{versionGroupHome.instance.slug}"/>
+          value="#{versionGroupHomeAction.instance.slug}"/>
       </s:link>
     </s:fragment>
     <s:link styleClass="action_link"
@@ -105,34 +124,32 @@
       rendered="#{versionGroupAction.isUserProjectMaintainer()}">
       <f:param name="emailType" value="request_to_join_group"/>
       <f:param name="versionGroupSlug"
-        value="#{versionGroupHome.instance.slug}"/>
+        value="#{versionGroupHomeAction.instance.slug}"/>
     </s:link>
   </rich:panel>
 
   <rich:panel>
     <f:facet name="header">#{messages['jsf.GroupMaintainers']}</f:facet>
     <h:outputText
-      rendered="#{empty versionGroupHome.instance.maintainers}">#{messages['jsf.NoMaintainersDefined']}</h:outputText>
-    <rich:list value="#{versionGroupHome.instance.maintainers.toArray()}"
+      rendered="#{empty versionGroupHomeAction.instance.maintainers}">#{messages['jsf.NoMaintainersDefined']}</h:outputText>
+    <rich:list value="#{versionGroupHomeAction.instance.maintainers.toArray()}"
       var="maintainer">
       <h:outputText value="#{maintainer.name}" styleClass="maintainer"/>
     </rich:list>
   </rich:panel>
 
   <s:fragment
-    rendered="#{versionGroupAction.isParamExists() and s:hasPermission(versionGroupHome.instance, 'update')}">
-    <script>
+    rendered="#{versionGroupAction.isParamExists() and s:hasPermission(versionGroupHomeAction.instance, 'update')}">
+    <script type="text/javascript">
       jQuery(document).ready(function () {
-        #{rich:component("versionAddPanel")}
-        .
-        show();
+        #{rich:component("versionAddPanel")}.show();
       });
     </script>
   </s:fragment>
 
 
   <rich:popupPanel id="versionAddPanel" width="530" height="460"
-    rendered="#{identity.loggedIn and s:hasPermission(versionGroupHome.instance, 'update')}">
+    rendered="#{identity.loggedIn and s:hasPermission(versionGroupHomeAction.instance, 'update')}">
     <f:subview id="projectVersionSearch">
       <h:form id="searchForm">
         <h1>#{messages['jsf.groups.FindProjectVersion']}</h1>
@@ -194,7 +211,6 @@
               </rich:column>
             </rich:dataTable>
           </a4j:outputPanel>
-          <richext:spacer height="5"/>
           <a4j:commandButton id="addSelectedBtn"
             value="#{messages['jsf.AddSelected']}"
             action="#{versionGroupAction.addSelected()}"

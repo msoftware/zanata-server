@@ -405,9 +405,9 @@
   </page>
 
   <page view-id="/version-group/version_group.xhtml">
-    <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
+    <param name="versionGroupSlug" value="#{versionGroupHomeAction.slug}" />
 
-    <action execute="#{versionGroupHome.validateSuppliedId}" />
+    <action execute="#{versionGroupHomeAction.validateSuppliedId}" />
     <action execute="#{versionGroupAction.init(versionGroupSlug)}" />
     <action execute="#{versionGroupAction.executePreSearch()}"
       on-postback="false" />

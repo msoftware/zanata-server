@@ -23,10 +23,8 @@ package org.zanata.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import javax.faces.event.ValueChangeEvent;
-import javax.faces.model.SelectItem;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -38,45 +36,44 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.security.management.JpaIdentityStore;
-import org.zanata.common.EntityStatus;
-import org.zanata.model.HAccount;
+import org.zanata.common.LocaleId;
+import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
+import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
-import org.zanata.service.SlugEntityService;
+import org.zanata.service.VersionLocaleKey;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
  */
 
-@Name("versionGroupHome")
-public class VersionGroupHome extends SlugHome<HIterationGroup> {
+@Name("versionGroupHomeAction")
+@Scope(ScopeType.PAGE)
+public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     private static final long serialVersionUID = 1L;
 
     @Getter
     @Setter
     private String slug;
 
-    @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
-    HAccount authenticatedAccount;
-
-    @In
-    private SlugEntityService slugEntityServiceImpl;
+    @Getter
+    @Setter
+    private boolean documentLoaded;
 
     @In
     private LocaleService localeServiceImpl;
 
-    private List<SelectItem> statusList;
+    @In
+    private GroupStatisticService groupStatisticServiceImpl;
 
     private List<LocaleItem> activeLocales;
+
+    private Map<VersionLocaleKey, WordsStatistic> statisticMap;
 
     @Override
     protected HIterationGroup loadInstance() {
@@ -111,54 +108,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         // start
     }
 
-    public void verifySlugAvailable(ValueChangeEvent e) {
-        String slug = (String) e.getNewValue();
-        validateSlug(slug, e.getComponent().getId());
-    }
-
-    public boolean validateSlug(String slug, String componentId) {
-        if (!isSlugAvailable(slug)) {
-            FacesMessages.instance().addToControl(componentId,
-                    "This Group ID is not available");
-            return false;
-        }
-        return true;
-    }
-
-    public boolean isSlugAvailable(String slug) {
-        return slugEntityServiceImpl.isSlugAvailable(slug,
-                HIterationGroup.class);
-    }
-
-    @Override
-    public String persist() {
-        if (!validateSlug(getInstance().getSlug(), "slug"))
-            return null;
-
-        if (authenticatedAccount != null) {
-            getInstance().addMaintainer(authenticatedAccount.getPerson());
-        }
-
-        updateActiveLocales();
-        return super.persist();
-    }
-
-    @Override
-    public String update() {
-        updateActiveLocales();
-        return super.update();
-    }
-
-    public String cancel() {
-        return "cancel";
-    }
-
-    @Override
-    public List<SelectItem> getStatusList() {
-        return getAvailableStatus();
-    }
-
-    public List<LocaleItem> getLocales() {
+    public List<LocaleItem> getActiveLocales() {
         if (activeLocales == null) {
             activeLocales = Lists.newArrayList();
 
@@ -171,8 +121,6 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
             for (HLocale locale : supportedLocales) {
                 if (groupActiveLocales.contains(locale)) {
                     activeLocales.add(new LocaleItem(true, locale));
-                } else {
-                    activeLocales.add(new LocaleItem(false, locale));
                 }
             }
         }
@@ -180,30 +128,45 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return activeLocales;
     }
 
-    private void updateActiveLocales() {
-        if (activeLocales != null) {
-            getInstance().getActiveLocales().clear();
-            for (LocaleItem localeItem : activeLocales) {
-                if (localeItem.isSelected()) {
-                    getInstance().getActiveLocales()
-                            .add(localeItem.getLocale());
-                }
+    public WordsStatistic getStatisticForLocale(LocaleId localeId) {
+        WordsStatistic statistic = new WordsStatistic();
+        for (Map.Entry<VersionLocaleKey, WordsStatistic> entry : getStatisticMap()
+                .entrySet()) {
+            if (entry.getKey().getLocaleId().equals(localeId)) {
+                statistic.add(entry.getValue());
             }
         }
+
+        return statistic;
     }
 
-    private List<SelectItem> getAvailableStatus() {
-        if (statusList == null) {
-            statusList =
-                    ImmutableList.copyOf(Iterables.filter(
-                            super.getStatusList(), new Predicate<SelectItem>() {
-                                @Override
-                                public boolean apply(SelectItem input) {
-                                    return !input.getValue().equals(
-                                            EntityStatus.READONLY);
-                                }
-                            }));
+    public String getOverallTranslatedPercentage() {
+        WordsStatistic statistic = new WordsStatistic();
+        for (Map.Entry<VersionLocaleKey, WordsStatistic> entry : getStatisticMap()
+                .entrySet()) {
+            statistic.add(entry.getValue());
         }
-        return statusList;
+        return statistic.getPercentTranslated() + "%";
     }
+
+    /**
+     * Load up statistics for all project versions in all active locales in the
+     * group
+     * 
+     * @return
+     */
+    private Map<VersionLocaleKey, WordsStatistic> getStatisticMap() {
+        if (statisticMap == null) {
+            Map<VersionLocaleKey, WordsStatistic> statisticMap =
+                    Maps.newHashMap();
+
+            for (LocaleItem localeItem : getActiveLocales()) {
+                statisticMap.putAll(groupStatisticServiceImpl
+                        .getLocaleStatistic(getInstanceProjectIterations(),
+                                localeItem.getLocale().getLocaleId()));
+            }
+        }
+        return statisticMap;
+    }
+
 }
