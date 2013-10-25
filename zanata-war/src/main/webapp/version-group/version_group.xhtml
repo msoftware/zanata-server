@@ -79,13 +79,13 @@
       var="localeItem" styleClass="new-zanata" id="stats_table">
       <rich:column>
         <f:facet name="header">Active Locales</f:facet>
-        ${localeItem.locale.retrieveDisplayName()}
+        ${localeItem.getLocale().retrieveDisplayName()}
       </rich:column>
       <rich:column>
         <f:facet name="header">Total Percentage for all versions</f:facet>
         <s:fragment rendered="#{versionGroupHomeAction.documentLoaded}">
           <zanata:statistic
-            value="${versionGroupHomeAction.getStatisticForLocale(localeItem.locale.localeId)}"/>
+            value="${versionGroupHomeAction.getStatisticForLocale(localeItem.getLocale().getLocaleId())}"/>
         </s:fragment>
         <s:fragment rendered="#{!versionGroupHomeAction.documentLoaded}">
           <h:graphicImage value="/images/loading.gif" alt="Loading"/>

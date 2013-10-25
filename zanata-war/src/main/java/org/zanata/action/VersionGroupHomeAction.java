@@ -157,8 +157,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
      */
     private Map<VersionLocaleKey, WordsStatistic> getStatisticMap() {
         if (statisticMap == null) {
-            Map<VersionLocaleKey, WordsStatistic> statisticMap =
-                    Maps.newHashMap();
+            statisticMap = Maps.newHashMap();
 
             for (LocaleItem localeItem : getActiveLocales()) {
                 statisticMap.putAll(groupStatisticServiceImpl
