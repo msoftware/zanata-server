@@ -62,18 +62,26 @@
 
     <script type="text/javascript">
       jQuery(document).ready(function () {
-        #{rich:element('refresh_stats')}.click();
+        reRenderStatistics();
       });
     </script>
 
-    <s:fragment rendered="#{versionGroupHomeAction.documentLoaded}">
+    <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
       <h:graphicImage value="/images/loading.gif" alt="Loading"/>
     </s:fragment>
 
-    <a4j:commandButton value="Refresh stats" id="refresh_stats"
-      action="#{versionGroupHomeAction.setDocumentLoaded(true)}" render="stats_table"/>
+    <a4j:jsFunction name="reRenderStatistics" render="stats_table" action="#{versionGroupHomeAction.setPageRendered(true)}" oncomplete="reRenderOverallStatistics()"/>
+    <a4j:jsFunction name="reRenderOverallStatistics" render="overall_statistic" action="#{versionGroupHomeAction.setStatisticsLoaded(true)}"/>
 
-    #{vesionGroupHome.getOverallTranslatedPercentage()}
+    <rich:panel id="overall_statistic">
+      <s:fragment rendered="#{versionGroupHomeAction.pageRendered and versionGroupHomeAction.statisticsLoaded}">
+        #{versionGroupHomeAction.getOverallTranslatedPercentage()}
+      </s:fragment>
+      <s:fragment rendered="#{!versionGroupHomeAction.pageRendered or !versionGroupHomeAction.statisticsLoaded}">
+        <h:graphicImage value="/images/loading.gif" alt="Loading"/>
+      </s:fragment>
+    </rich:panel>
+
 
     <rich:dataTable value="#{versionGroupHomeAction.getActiveLocales()}"
       var="localeItem" styleClass="new-zanata" id="stats_table">
@@ -83,11 +91,11 @@
       </rich:column>
       <rich:column>
         <f:facet name="header">Total Percentage for all versions</f:facet>
-        <s:fragment rendered="#{versionGroupHomeAction.documentLoaded}">
+        <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
           <zanata:statistic
             value="${versionGroupHomeAction.getStatisticForLocale(localeItem.getLocale().getLocaleId())}"/>
         </s:fragment>
-        <s:fragment rendered="#{!versionGroupHomeAction.documentLoaded}">
+        <s:fragment rendered="#{!versionGroupHomeAction.pageRendered}">
           <h:graphicImage value="/images/loading.gif" alt="Loading"/>
         </s:fragment>
       </rich:column>

@@ -36,6 +36,7 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.zanata.annotation.CachedMethodResult;
 import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordsStatistic;
 import org.zanata.model.HIterationGroup;
@@ -63,7 +64,11 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     @Getter
     @Setter
-    private boolean documentLoaded;
+    private boolean pageRendered = false;
+
+    @Setter
+    @Getter
+    private boolean statisticsLoaded = false;
 
     @In
     private LocaleService localeServiceImpl;
@@ -128,6 +133,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         return activeLocales;
     }
 
+    @CachedMethodResult
     public WordsStatistic getStatisticForLocale(LocaleId localeId) {
         WordsStatistic statistic = new WordsStatistic();
         for (Map.Entry<VersionLocaleKey, WordsStatistic> entry : getStatisticMap()
@@ -136,7 +142,6 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                 statistic.add(entry.getValue());
             }
         }
-
         return statistic;
     }
 
@@ -164,6 +169,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                         .getLocaleStatistic(getInstanceProjectIterations(),
                                 localeItem.getLocale().getLocaleId()));
             }
+            this.statisticsLoaded = true;
         }
         return statisticMap;
     }
