@@ -4,12 +4,12 @@
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:composite="http://java.sun.com/jsf/composite"
   xmlns:ui="http://java.sun.com/jsf/facelets"
-  xmlns:s="http://jboss.org/schema/seam/taglib"
-  xmlns:f="http://java.sun.com/jsf/core">
+  xmlns:s="http://jboss.org/schema/seam/taglib">
 
 <composite:interface>
   <composite:attribute name="value"
-    type="org.zanata.common.statistic.WordsStatistic" required="true"/>
+    type="org.zanata.common.statistic.WordStatistic" required="true"/>
+  <composite:attribute name="type" shortDescription="Type of statistic bar, 'large' or leave empty for default"/>
 </composite:interface>
 <composite:implementation>
   <s:fragment rendered="#{cc.attrs.value != ''}">
@@ -23,7 +23,9 @@
 
     <ui:param name="total" value="#{cc.attrs.value.total}"/>
 
-    <div class="progress-bar">
+    <div
+      class="#{cc.attrs.type eq 'large' ? 'progress-bar--large' : 'progress-bar'}"
+      title="#{messages['jsf.stats.Total']} #{total}, #{messages['jsf.stats.Approved']} #{approved}, #{messages['jsf.stats.Translated']} #{translated}, #{messages['jsf.stats.Fuzzy']} #{fuzzy}, #{messages['jsf.stats.Rejected']} #{rejected}, #{messages['jsf.stats.Untranslated']} #{untranslated}">
       <s:fragment rendered="#{total > 0}">
         <ui:param name="translated_percentage"
           value="#{cc.attrs.value.percentTranslated}"/>
@@ -37,7 +39,7 @@
           value="#{cc.attrs.value.percentUntranslated}"/>
 
         <span class="progress-bar__translated"
-          title=" #{translated_percentage}% #{messages['jsf.stats.Translated']}"
+          title="#{translated_percentage}% #{messages['jsf.stats.Translated']}"
           style="width: #{translated_percentage}%;">
         <span class="is-invisible"> #{messages['jsf.stats.Translated']}</span>
         </span>

@@ -215,7 +215,8 @@ public class ViewAllStatusAction implements Serializable {
                             .getId());
         } else {
             total =
-                    projectIterationDAO.getTotalCountForIteration(iteration
+                    projectIterationDAO.getTotalMessageCountForIteration(
+                        iteration
                             .getId());
         }
 
@@ -254,7 +255,8 @@ public class ViewAllStatusAction implements Serializable {
                             .getId());
         } else {
             total =
-                    projectIterationDAO.getTotalCountForIteration(iteration
+                    projectIterationDAO.getTotalMessageCountForIteration(
+                        iteration
                             .getId());
         }
 

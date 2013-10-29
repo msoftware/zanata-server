@@ -3,7 +3,7 @@ package org.zanata.util;
 import org.zanata.common.AbstractTranslationCount;
 import org.zanata.common.ContentState;
 import org.zanata.common.TransUnitWords;
-import org.zanata.common.statistic.WordsStatistic;
+import org.zanata.common.statistic.WordStatistic;
 import org.zanata.rest.dto.stats.TranslationStatistics;
 
 /**
@@ -23,7 +23,7 @@ public class StatisticsUtil {
                 - translationCount.get(ContentState.Rejected);
     }
 
-    public static double getRemainingHours(WordsStatistic wordsStatistic) {
+    public static double getRemainingHours(WordStatistic wordsStatistic) {
         return getRemainingHours(wordsStatistic.getTranslated(),
                 wordsStatistic.getUntranslated(),
                 wordsStatistic.getNeedReview() + wordsStatistic.getRejected());

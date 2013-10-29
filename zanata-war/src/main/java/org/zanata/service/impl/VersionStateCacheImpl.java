@@ -34,7 +34,7 @@ import org.jboss.seam.annotations.Scope;
 import org.zanata.cache.CacheWrapper;
 import org.zanata.cache.EhcacheWrapper;
 import org.zanata.common.LocaleId;
-import org.zanata.common.statistic.WordsStatistic;
+import org.zanata.common.statistic.WordStatistic;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.events.TextFlowTargetStateEvent;
 import org.zanata.service.VersionLocaleKey;
@@ -55,8 +55,8 @@ public class VersionStateCacheImpl implements VersionStateCache {
 
     private CacheManager cacheManager;
 
-    private CacheWrapper<VersionLocaleKey, WordsStatistic> versionStatisticCache;
-    private CacheLoader<VersionLocaleKey, WordsStatistic> versionStatisticLoader;
+    private CacheWrapper<VersionLocaleKey, WordStatistic> versionStatisticCache;
+    private CacheLoader<VersionLocaleKey, WordStatistic> versionStatisticLoader;
 
     public VersionStateCacheImpl() {
         // constructor for Seam
@@ -81,7 +81,7 @@ public class VersionStateCacheImpl implements VersionStateCache {
     public void textFlowStateUpdated(TextFlowTargetStateEvent event) {
         VersionLocaleKey key =
                 new VersionLocaleKey(event.getVersionId(), event.getLocaleId());
-        WordsStatistic stats = versionStatisticCache.get(key);
+        WordStatistic stats = versionStatisticCache.get(key);
 
         if (stats != null) {
             stats.decrement(event.getPreviousState(), 1);
@@ -91,14 +91,14 @@ public class VersionStateCacheImpl implements VersionStateCache {
     }
 
     @Override
-    public WordsStatistic
+    public WordStatistic
             getVersionStatistic(Long versionId, LocaleId localeId) {
         return versionStatisticCache.getWithLoader(new VersionLocaleKey(
                 versionId, localeId));
     }
 
     private static class VersionStatisticLoader extends
-            CacheLoader<VersionLocaleKey, WordsStatistic> {
+            CacheLoader<VersionLocaleKey, WordStatistic> {
 
         ProjectIterationDAO getProjectIterationDAO() {
             return (ProjectIterationDAO) Component
@@ -106,13 +106,13 @@ public class VersionStateCacheImpl implements VersionStateCache {
         }
 
         @Override
-        public WordsStatistic load(VersionLocaleKey key) throws Exception {
+        public WordStatistic load(VersionLocaleKey key) throws Exception {
 
-            WordsStatistic wordsStatistic =
+            WordStatistic wordStatistic =
                     getProjectIterationDAO().getWordStatistic(
                             key.getVersionId(), key.getLocaleId());
 
-            return wordsStatistic;
+            return wordStatistic;
         }
     }
 }

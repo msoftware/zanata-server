@@ -125,7 +125,7 @@ public class StatisticsServiceImpl implements StatisticsResource {
                 "PROJ_ITER"));
         long iterationTotalMssgs =
                 projectIterationDAO
-                        .getTotalCountForIteration(iteration.getId());
+                        .getTotalMessageCountForIteration(iteration.getId());
         long iterationTotalWords =
                 projectIterationDAO.getTotalWordCountForIteration(iteration
                         .getId());

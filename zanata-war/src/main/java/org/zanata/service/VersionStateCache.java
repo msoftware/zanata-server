@@ -23,12 +23,12 @@
 package org.zanata.service;
 
 import org.zanata.common.LocaleId;
-import org.zanata.common.statistic.WordsStatistic;
+import org.zanata.common.statistic.WordStatistic;
 import org.zanata.events.TextFlowTargetStateEvent;
 
 /**
  * Defines a Cache Service for project version states.
- * 
+ *
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
  */
 public interface VersionStateCache {
@@ -36,9 +36,9 @@ public interface VersionStateCache {
     /**
      * Informs the cache that a text flow has changed its state in a given
      * locale. (It's really a Text Flow Target state)
-     * 
+     *
      */
     void textFlowStateUpdated(TextFlowTargetStateEvent event);
 
-    WordsStatistic getVersionStatistic(Long versionId, LocaleId localeId);
+    WordStatistic getVersionStatistic(Long versionId, LocaleId localeId);
 }

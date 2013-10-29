@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,13 +39,14 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.zanata.annotation.CachedMethodResult;
 import org.zanata.common.LocaleId;
-import org.zanata.common.statistic.WordsStatistic;
+import org.zanata.common.statistic.WordStatistic;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
 import org.zanata.service.VersionLocaleKey;
+import org.zanata.util.StatisticsUtil;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,19 +68,17 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Setter
     private boolean pageRendered = false;
 
-    @Setter
-    @Getter
-    private boolean statisticsLoaded = false;
-
     @In
     private LocaleService localeServiceImpl;
 
     @In
     private GroupStatisticService groupStatisticServiceImpl;
 
+    private OverallStatistics overallStatistics;
+
     private List<LocaleItem> activeLocales;
 
-    private Map<VersionLocaleKey, WordsStatistic> statisticMap;
+    private Map<VersionLocaleKey, WordStatistic> statisticMap;
 
     @Override
     protected HIterationGroup loadInstance() {
@@ -134,9 +134,9 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     }
 
     @CachedMethodResult
-    public WordsStatistic getStatisticForLocale(LocaleId localeId) {
-        WordsStatistic statistic = new WordsStatistic();
-        for (Map.Entry<VersionLocaleKey, WordsStatistic> entry : getStatisticMap()
+    public WordStatistic getStatisticForLocale(LocaleId localeId) {
+        WordStatistic statistic = new WordStatistic();
+        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
                 .entrySet()) {
             if (entry.getKey().getLocaleId().equals(localeId)) {
                 statistic.add(entry.getValue());
@@ -145,33 +145,63 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         return statistic;
     }
 
-    public String getOverallTranslatedPercentage() {
-        WordsStatistic statistic = new WordsStatistic();
-        for (Map.Entry<VersionLocaleKey, WordsStatistic> entry : getStatisticMap()
+    private int getTotalWordsCountForGroup() {
+        int total = 0;
+        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
                 .entrySet()) {
-            statistic.add(entry.getValue());
+            total += entry.getValue().getTotal();
         }
-        return statistic.getPercentTranslated() + "%";
+        return total;
+    }
+
+    @CachedMethodResult
+    public OverallStatistics getOverallStatistic() {
+        if (overallStatistics == null) {
+
+            WordStatistic wordStatistic = new WordStatistic();
+            for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
+                    .entrySet()) {
+                wordStatistic.add(entry.getValue());
+            }
+            wordStatistic.setRemainingHours(StatisticsUtil
+                    .getRemainingHours(wordStatistic));
+
+            int totalWordCount = getTotalWordsCountForGroup();
+            int totalMessageCount = groupStatisticServiceImpl.getTotalMessageCount(slug);
+
+            overallStatistics =
+                    new OverallStatistics(totalWordCount, totalMessageCount,
+                            wordStatistic);
+
+        }
+        return overallStatistics;
     }
 
     /**
      * Load up statistics for all project versions in all active locales in the
      * group
-     * 
+     *
      * @return
      */
-    private Map<VersionLocaleKey, WordsStatistic> getStatisticMap() {
+    private Map<VersionLocaleKey, WordStatistic> getStatisticMap() {
         if (statisticMap == null) {
             statisticMap = Maps.newHashMap();
 
             for (LocaleItem localeItem : getActiveLocales()) {
                 statisticMap.putAll(groupStatisticServiceImpl
-                        .getLocaleStatistic(getInstanceProjectIterations(),
-                                localeItem.getLocale().getLocaleId()));
+                        .getLocaleStatistic(slug, localeItem.getLocale()
+                                .getLocaleId()));
             }
-            this.statisticsLoaded = true;
         }
         return statisticMap;
     }
 
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public final class OverallStatistics {
+        int totalWordCount;
+        int totalMessageCount;
+        WordStatistic statistic;
+    }
 }

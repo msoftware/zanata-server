@@ -8,227 +8,178 @@
   xmlns:rich="http://richfaces.org/rich"
   xmlns:a4j="http://richfaces.org/a4j"
   xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
-  template="../WEB-INF/template/template_2x.xhtml">
+  template="../WEB-INF/template/template.xhtml">
 
-<ui:define
-  name="page_title">#{messages['jsf.Groups']}:#{versionGroupHomeAction.instance.name}</ui:define>
+  <ui:define
+    name="page_title">#{messages['jsf.Groups']}:#{versionGroupHomeAction.instance.name}</ui:define>
 
-<ui:define name="head">
-  <!-- Load jQuery -->
-  <rich:jQuery query="jquery"/>
+  <ui:define name="head">
+    <!-- Load jQuery -->
+    <rich:jQuery query="jquery"/>
+  </ui:define>
 
-  <script type="text/javascript">
-    function submitSearchOnEnter(e) {
-      if (e.keyCode == 13) {
-        #{rich:element('searchBtn')}.click();
-        return false;
-      }
-    }
-  </script>
-</ui:define>
+  <ui:define name="center_content">
+    <h:form>
+      <script type="text/javascript">
+        jQuery(document).ready(function () {
+          reRenderStatistics();
+        });
+      </script>
 
-<ui:define name="center_content">
-  <h:form id="iterationGroupForm">
-    <s:formattedText value="#{versionGroupHomeAction.instance.description}"
-      rendered="#{!empty versionGroupHomeAction.instance.description}"/>
+      <a4j:jsFunction name="reRenderStatistics" render="stats_list"
+        action="#{versionGroupHomeAction.setPageRendered(true)}"
+        oncomplete="reRenderOverallStatistics()"/>
+      <a4j:jsFunction name="reRenderOverallStatistics"
+        render="overall_statistic"/>
+    </h:form>
 
-    <rich:dataTable id="iterationsDataTable"
-      value="#{versionGroupHomeAction.instanceProjectIterations}"
-      var="_iteration">
-      <rich:column sortBy="#{_iteration.project.slug}">
-        <f:facet name="header">#{messages['jsf.ProjectName']}</f:facet>
-        <s:link view="/project/project.xhtml"
-          value="#{_iteration.project.name}" styleClass="table_link">
-          <f:param name="slug" value="#{_iteration.project.slug}"/>
-        </s:link>
-      </rich:column>
-      <rich:column sortBy="#{_iteration.slug}">
-        <f:facet name="header">#{messages['jsf.Version']}</f:facet>
-        <s:link view="/iteration/view.xhtml" styleClass="table_link"
-          value="#{_iteration.slug}">
-          <f:param name="projectSlug" value="#{_iteration.project.slug}"/>
-          <f:param name="iterationSlug" value="#{_iteration.slug}"/>
-        </s:link>
-      </rich:column>
-      <rich:column
-        rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}"
-        styleClass="centered">
-        <f:facet name="header">#{messages['jsf.Actions']}</f:facet>
-        <a4j:commandButton value="#{messages['jsf.Remove']}"
-          action="#{versionGroupAction.leaveVersionGroup(_iteration.id)}"
-          render="iterationsDataTable, searchResults"/>
-      </rich:column>
-    </rich:dataTable>
-
-    <script type="text/javascript">
-      jQuery(document).ready(function () {
-        reRenderStatistics();
-      });
-    </script>
-
-    <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
-      <h:graphicImage value="/images/loading.gif" alt="Loading"/>
-    </s:fragment>
-
-    <a4j:jsFunction name="reRenderStatistics" render="stats_table" action="#{versionGroupHomeAction.setPageRendered(true)}" oncomplete="reRenderOverallStatistics()"/>
-    <a4j:jsFunction name="reRenderOverallStatistics" render="overall_statistic" action="#{versionGroupHomeAction.setStatisticsLoaded(true)}"/>
-
-    <rich:panel id="overall_statistic">
-      <s:fragment rendered="#{versionGroupHomeAction.pageRendered and versionGroupHomeAction.statisticsLoaded}">
-        #{versionGroupHomeAction.getOverallTranslatedPercentage()}
-      </s:fragment>
-      <s:fragment rendered="#{!versionGroupHomeAction.pageRendered or !versionGroupHomeAction.statisticsLoaded}">
-        <h:graphicImage value="/images/loading.gif" alt="Loading"/>
-      </s:fragment>
-    </rich:panel>
-
-
-    <rich:dataTable value="#{versionGroupHomeAction.getActiveLocales()}"
-      var="localeItem" styleClass="new-zanata" id="stats_table">
-      <rich:column>
-        <f:facet name="header">Active Locales</f:facet>
-        ${localeItem.getLocale().retrieveDisplayName()}
-      </rich:column>
-      <rich:column>
-        <f:facet name="header">Total Percentage for all versions</f:facet>
-        <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
-          <zanata:statistic
-            value="${versionGroupHomeAction.getStatisticForLocale(localeItem.getLocale().getLocaleId())}"/>
-        </s:fragment>
-        <s:fragment rendered="#{!versionGroupHomeAction.pageRendered}">
-          <h:graphicImage value="/images/loading.gif" alt="Loading"/>
-        </s:fragment>
-      </rich:column>
-    </rich:dataTable>
-  </h:form>
-
-</ui:define>
-
-<ui:define name="right_content">
-
-  <rich:panel id="loggedIn" rendered="#{identity.loggedIn}">
-    <f:facet name="header">#{messages['jsf.Actions']}</f:facet>
-    <s:fragment
-      rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}">
-      <a href="#" class="action_link"
-        onclick="#{rich:component('versionAddPanel')}.show()">#{messages['jsf.AddProjectVersions']}</a>
-
-      <s:link styleClass="action_link" value="#{messages['jsf.Settings']}"
-        view="/version-group/settings.xhtml" propagation="none">
-        <f:param name="versionGroupSlug"
-          value="#{versionGroupHomeAction.instance.slug}"/>
-      </s:link>
-
-      <s:link styleClass="action_link"
-        view="/version-group/assign_maintainer.xhtml"
-        value="#{messages['jsf.ManageMaintainers']}" propagation="none">
-        <f:param name="versionGroupSlug"
-          value="#{versionGroupHomeAction.instance.slug}"/>
-      </s:link>
-    </s:fragment>
-    <s:link styleClass="action_link"
-      view="/version-group/request_to_join.xhtml"
-      value="#{messages['jsf.RequestToJoinVersionGroup']}" propagation="none"
-      rendered="#{versionGroupAction.isUserProjectMaintainer()}">
-      <f:param name="emailType" value="request_to_join_group"/>
-      <f:param name="versionGroupSlug"
-        value="#{versionGroupHomeAction.instance.slug}"/>
-    </s:link>
-  </rich:panel>
-
-  <rich:panel>
-    <f:facet name="header">#{messages['jsf.GroupMaintainers']}</f:facet>
-    <h:outputText
-      rendered="#{empty versionGroupHomeAction.instance.maintainers}">#{messages['jsf.NoMaintainersDefined']}</h:outputText>
-    <rich:list value="#{versionGroupHomeAction.instance.maintainers.toArray()}"
-      var="maintainer">
-      <h:outputText value="#{maintainer.name}" styleClass="maintainer"/>
-    </rich:list>
-  </rich:panel>
-
-  <s:fragment
-    rendered="#{versionGroupAction.isParamExists() and s:hasPermission(versionGroupHomeAction.instance, 'update')}">
-    <script type="text/javascript">
-      jQuery(document).ready(function () {
-        #{rich:component("versionAddPanel")}.show();
-      });
-    </script>
-  </s:fragment>
-
-
-  <rich:popupPanel id="versionAddPanel" width="530" height="460"
-    rendered="#{identity.loggedIn and s:hasPermission(versionGroupHomeAction.instance, 'update')}">
-    <f:subview id="projectVersionSearch">
-      <h:form id="searchForm">
-        <h1>#{messages['jsf.groups.FindProjectVersion']}</h1>
-
-        <p>
-          <h:inputText id="searchField"
-            value="#{versionGroupAction.searchTerm}"
-            onkeydown="return submitSearchOnEnter(event)"/>
-          <a4j:commandButton id="searchBtn"
-            value="#{messages['jsf.Search']}"
-            action="#{versionGroupAction.searchProjectAndVersion}"
-            render="searchResults"/>
-
-          <a4j:commandButton id="closeBtn" value="#{messages['jsf.Close']}"
-            onclick="#{rich:component('versionAddPanel')}.hide(); return false;"/>
-
+    <div class="g">
+      <div class="g__item w--1-2-m w--3-8-l w--1-3 l--push-bottom-1">
+        <p class="txt--meta l--push-all-0">
+          <s:link view="/version-group/home.xhtml"
+            propagation="none">#{messages['jsf.Groups']}</s:link>
         </p>
-      </h:form>
-      <a4j:region id="region">
-        <h:form id="searchResults">
-          <h:outputText id="noResultsMessage"
-            rendered="#{empty versionGroupAction.searchResults}"
-            value="#{messages['jsf.NoResultToDisplayProjectSearch']}"/>
-          <a4j:outputPanel layout="block" style="overflow:auto;height:320px"
-            rendered="#{not empty versionGroupAction.searchResults}">
-            <rich:dataTable id="resultTable"
-              value="#{versionGroupAction.searchResults}"
-              var="selectableVersion">
-              <rich:column
-                sortBy="#{selectableVersion.projectIteration.project.name}">
-                <f:facet
-                  name="header">#{messages['jsf.ProjectName']}</f:facet>
-                #{selectableVersion.projectIteration.project.name}
-              </rich:column>
-              <rich:column
-                sortBy="#{selectableVersion.projectIteration.slug}">
-                <f:facet name="header">#{messages['jsf.Version']}</f:facet>
-                #{selectableVersion.projectIteration.slug}
-              </rich:column>
 
-              <rich:column styleClass="centered">
-                <f:facet name="header">
-                  <h:panelGroup>
-                    <h:selectBooleanCheckbox
-                      title="#{messages['jsf.ManageSearch.SelectAll']}"
-                      value="#{versionGroupAction.selectAll}">
-                      <a4j:ajax event="change" render="searchResults"
-                        listener="#{versionGroupAction.selectAll()}"/>
-                    </h:selectBooleanCheckbox>
-                  </h:panelGroup>
-                </f:facet>
+        <div class="media l--push-bottom-half">
+          <div class="media__body">
+            <h1
+              class="l--push-all-0">#{versionGroupHomeAction.instance.name}</h1>
 
-                <h:selectBooleanCheckbox title="#{messages['jsf.Select']}"
-                  value="#{selectableVersion.selected}"
-                  rendered="#{!versionGroupAction.isVersionInGroup(selectableVersion.projectIteration.id)}"/>
-                <h:outputText value="#{messages['jsf.AlreadyInGroup']}"
-                  rendered="#{versionGroupAction.isVersionInGroup(selectableVersion.projectIteration.id)}"/>
+            <p
+              class="txt--understated">#{versionGroupHomeAction.instance.description}</p>
+          </div>
+        </div>
 
-              </rich:column>
-            </rich:dataTable>
-          </a4j:outputPanel>
-          <a4j:commandButton id="addSelectedBtn"
-            value="#{messages['jsf.AddSelected']}"
-            action="#{versionGroupAction.addSelected()}"
-            render="searchResults, iterationsDataTable"
-            styleClass="float-right"/>
-        </h:form>
-      </a4j:region>
-    </f:subview>
-  </rich:popupPanel>
+        <a4j:outputPanel id="overall_statistic">
+          <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
+            <p class="d--top l--pad-top-half txt--mini">
+              #{messages['jsf.TotalSourceContains']}
+              <strong>#{versionGroupHomeAction.getOverallStatistic().getTotalWordCount()} words / #{versionGroupHomeAction.getOverallStatistic().getTotalMessageCount()} messages</strong>
+            </p>
+            <ul class="g g--fit">
+              <li class="g__item"><span
+                class="stats--large txt--state-success"><span
+                class="stats__figure">#{versionGroupHomeAction.getOverallStatistic().statistic.percentTranslated}%</span> <span
+                class="stats__unit">#{messages['jsf.stats.Translated']}</span></span>
+              </li>
+              <li class="g__item"><span class="stats--large"><span
+                class="stats__figure">#{versionGroupHomeAction.getOverallStatistic().statistic.remainingHours}</span> <span
+                class="stats__unit">#{messages['jsf.stats.TotalHoursRemaining']}</span></span>
+              </li>
+            </ul>
+            <div class="progress-bar__expander l--push-v-1">
+              <zanata:statistic
+                value="#{versionGroupHomeAction.getOverallStatistic().statistic}"
+                type="large"/>
+            </div>
+          </s:fragment>
+          <h:graphicImage value="/images/loading.gif" alt="Loading"
+            rendered="#{!versionGroupHomeAction.pageRendered}"/>
+        </a4j:outputPanel>
+      </div>
 
-</ui:define>
+      <div class="g__item w--1-2-m w--5-8-l w--2-3">
+        <div class="tabs--lined">
+          <nav class="tabs__nav">
+            <ul>
+              <li>
+                <a href="#" class="is-active">
+                  <i class="i i--language"></i>
+                  <span
+                    class="is-hidden--m-down">#{messages['jsf.Languages']}</span>
+                  <span
+                    class="txt--neutral">#{versionGroupHomeAction.activeLocales.size}</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="i i--project"></i>
+                  <span
+                    class="is-hidden--m-down">#{messages['jsf.Projects']}</span>
+                  <span
+                    class="txt--neutral">#{versionGroupHomeAction.instanceProjectIterations.size}</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="i i--users"></i>
+                  <span
+                    class="is-hidden--m-down">#{messages['jsf.Maintainers']}</span>
+                  <span
+                    class="txt--neutral">#{versionGroupHomeAction.instance.maintainers.size}</span>
+                </a>
+              </li>
+              <li>
+                <s:link href="#"
+                  view="/version-group/settings.xhtml" propagation="none">
+                  <f:param name="versionGroupSlug"
+                    value="#{versionGroupHomeAction.instance.slug}"/>
+                  <i class="i i--settings"></i>
+                  <span class="is-hidden--m-down">
+                    #{messages['jsf.Settings']}
+                  </span>
+                </s:link>
+              </li>
+            </ul>
+          </nav>
+          <div class="tabs__content">
+            <div class="g--collapsed">
+              <div class="g__item w--1-m w--1-2">
+                <div class="bg--pop-high l--push-top-1">
+                  <div class="bg--pop-highest l--pad-h-half l--pad-v-quarter">
+                    <h2
+                      class="heading--secondary gamma">#{messages['jsf.Languages']}</h2>
+                  </div>
+                  <a4j:outputPanel id="stats_list">
+                    <ul class="list--stats">
+                      <ui:repeat
+                        value="#{versionGroupHomeAction.getActiveLocales()}"
+                        var="localeItem">
+                        <li class="progress-bar__expander">
+                          <a href="#">
+                            <div class="list__item">
+                              <div class="list__item__info">
+                              <span
+                                class="list__title">${localeItem.getLocale().retrieveDisplayName()}</span>
+                              </div>
+                              <s:div styleClass="list__item__stats"
+                                rendered="#{versionGroupHomeAction.pageRendered}">
+                                 <span class="stats--small txt--state-neutral">
+                                  <span class="stats__figure">
+                                    ${versionGroupHomeAction.getStatisticForLocale(localeItem.getLocale().getLocaleId()).percentTranslated}%
+                                  </span>
+                                  <span
+                                    class="stats__unit">#{messages['jsf.Translated']}</span>
+                                </span>
+                              </s:div>
+                              <h:graphicImage value="/images/loading.gif"
+                                alt="Loading"
+                                rendered="#{!versionGroupHomeAction.pageRendered}"/>
+                            </div>
+                            <s:div styleClass="progress-bar"
+                              rendered="#{versionGroupHomeAction.pageRendered}">
+                                <span class="progress-bar__item">
+                                  <zanata:statistic
+                                    value="${versionGroupHomeAction.getStatisticForLocale(localeItem.getLocale().getLocaleId())}"/>
+                                </span>
+                            </s:div>
+                            <h:graphicImage value="/images/loading.gif"
+                              alt="Loading"
+                              rendered="#{!versionGroupHomeAction.pageRendered}"/>
+                          </a>
+                        </li>
+                      </ui:repeat>
+                    </ul>
+                  </a4j:outputPanel>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ui:define>
 
 </ui:composition>
