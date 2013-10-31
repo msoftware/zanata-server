@@ -31,24 +31,23 @@ import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Transactional;
 import org.jboss.seam.annotations.security.Restrict;
 import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.log.Log;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.dao.ProjectDAO;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.model.HAccount;
-import org.zanata.model.HIterationGroup;
 import org.zanata.model.HPerson;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.VersionGroupService;
 import org.zanata.service.VersionGroupService.SelectableHProject;
+
+import com.google.common.collect.Lists;
 
 @Name("versionGroupJoinAction")
 @Scope(ScopeType.PAGE)
@@ -70,12 +69,8 @@ public class VersionGroupJoinAction implements Serializable {
     @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
     private HAccount authenticatedAccount;
 
-    @Logger
-    private Log log;
-
-    private List<SelectableHProject> projectVersions;
-
-    private HIterationGroup group;
+    @Getter
+    private List<SelectableHProject> projectVersions = Lists.newArrayList();
 
     @Getter
     @Setter
@@ -100,7 +95,8 @@ public class VersionGroupJoinAction implements Serializable {
     @Setter
     private boolean selectAll = false;
 
-    private List<SelectableHProject> searchResults;
+    @Getter
+    private List<SelectableHProject> searchResults = Lists.newArrayList();
 
     public boolean isParamExists() {
         return slugParam != null && slugParam.length != 0;
@@ -109,7 +105,7 @@ public class VersionGroupJoinAction implements Serializable {
     public void selectAll() {
         for (SelectableHProject selectableVersion : getSearchResults()) {
             if (!isVersionInGroup(selectableVersion.getProjectIteration()
-                .getId())) {
+                    .getId())) {
                 selectableVersion.setSelected(selectAll);
             }
         }
@@ -121,8 +117,8 @@ public class VersionGroupJoinAction implements Serializable {
         for (HProject project : maintainedProjects) {
             for (HProjectIteration projectIteration : projectDAO
                     .getAllIterations(project.getSlug())) {
-                getProjectVersions().add(
-                        new SelectableHProject(projectIteration, false));
+                projectVersions.add(new SelectableHProject(projectIteration,
+                        false));
             }
         }
     }
@@ -133,18 +129,11 @@ public class VersionGroupJoinAction implements Serializable {
             HProjectIteration projectIteration =
                     projectIterationDAO.getBySlug(projectSlug, iterationSlug);
             if (projectIteration != null) {
-                getProjectVersions().add(
-                        new SelectableHProject(projectIteration, true));
+                projectVersions.add(new SelectableHProject(projectIteration,
+                        true));
             }
 
         }
-    }
-
-    public List<SelectableHProject> getProjectVersions() {
-        if (projectVersions == null) {
-            projectVersions = new ArrayList<SelectableHProject>();
-        }
-        return projectVersions;
     }
 
     public boolean isVersionInGroup(Long projectIterationId) {
@@ -158,7 +147,7 @@ public class VersionGroupJoinAction implements Serializable {
 
     public String send() {
         boolean isAnyVersionSelected = false;
-        for (SelectableHProject projectVersion : getProjectVersions()) {
+        for (SelectableHProject projectVersion : projectVersions) {
             if (projectVersion.isSelected()) {
                 isAnyVersionSelected = true;
             }
@@ -178,22 +167,15 @@ public class VersionGroupJoinAction implements Serializable {
 
     }
 
-    public HIterationGroup getGroup() {
-        if (group == null) {
-            group = versionGroupServiceImpl.getBySlug(slug);
-        }
-        return group;
-    }
-
     public String getQuery() {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(slug);
         queryBuilder.append("/");
-        if (!getProjectVersions().isEmpty()) {
+        if (!projectVersions.isEmpty()) {
             queryBuilder.append("?");
 
-            for (int i = 0; i < getProjectVersions().size(); i++) {
-                SelectableHProject projectVersion = getProjectVersions().get(i);
+            for (int i = 0; i < projectVersions.size(); i++) {
+                SelectableHProject projectVersion = projectVersions.get(i);
                 if (projectVersion.isSelected()) {
                     if (i != 0) {
                         queryBuilder.append("&");
@@ -238,15 +220,13 @@ public class VersionGroupJoinAction implements Serializable {
     @Transactional
     @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
     private void joinVersionGroup(Long projectIterationId) {
-        versionGroupServiceImpl.joinVersionGroup(group.getSlug(),
-                projectIterationId);
+        versionGroupServiceImpl.joinVersionGroup(slug, projectIterationId);
     }
 
     @Transactional
     @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
     public void leaveVersionGroup(Long projectIterationId) {
-        versionGroupServiceImpl.leaveVersionGroup(group.getSlug(),
-                projectIterationId);
+        versionGroupServiceImpl.leaveVersionGroup(slug, projectIterationId);
         searchProjectAndVersion();
     }
 
@@ -268,12 +248,4 @@ public class VersionGroupJoinAction implements Serializable {
             }
         }
     }
-
-    public List<SelectableHProject> getSearchResults() {
-        if (searchResults == null) {
-            searchResults = new ArrayList<SelectableHProject>();
-        }
-        return searchResults;
-    }
-
 }

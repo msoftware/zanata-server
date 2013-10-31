@@ -66,7 +66,7 @@
                 </span>
               </li>
               <li class="g__item"><span class="stats--large"><span
-                class="stats__figure">#{statisticsUtil.formatHours(versionGroupHomeAction.getOverallStatistic().statistic.remainingHours)}</span> <span
+                class="stats__figure">#{versionGroupHomeAction.getOverallStatistic().statistic.remainingHours}</span> <span
                 class="stats__unit">#{messages['jsf.stats.TotalHoursRemaining']}</span></span>
               </li>
             </ul>
@@ -149,7 +149,7 @@
                                 rendered="#{versionGroupHomeAction.pageRendered}">
                                  <span class="stats--small txt--state-neutral">
                                   <span class="stats__figure">
-                                    ${versionGroupHomeAction.getTranslatedPercentage(localeItem.getLocale().getLocaleId()).percentTranslated}%
+                                    ${versionGroupHomeAction.getTranslatedPercentage(localeItem.getLocale().getLocaleId())}%
                                   </span>
                                   <span
                                     class="stats__unit">#{messages['jsf.Translated']}</span>

@@ -412,8 +412,8 @@
 
   <page view-id="/version-group/settings.xhtml" login-required="true">
     <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-    <param name="versionGroupSlug"
-      value="#{versionGroupMaintainerAction.slug}" />
+    <param name="versionGroupSlug" value="#{versionGroupMaintainerAction.slug}" />
+    <param name="versionGroupSlug" value="#{versionGroupJoinAction.slug}" />
     <action
       execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
 
