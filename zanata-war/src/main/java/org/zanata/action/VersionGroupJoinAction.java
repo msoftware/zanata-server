@@ -34,12 +34,19 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Transactional;
+import org.jboss.seam.annotations.security.Restrict;
+import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.dao.ProjectDAO;
 import org.zanata.dao.ProjectIterationDAO;
-import org.zanata.model.*;
+import org.zanata.model.HAccount;
+import org.zanata.model.HIterationGroup;
+import org.zanata.model.HPerson;
+import org.zanata.model.HProject;
+import org.zanata.model.HProjectIteration;
 import org.zanata.service.VersionGroupService;
 import org.zanata.service.VersionGroupService.SelectableHProject;
 
@@ -81,6 +88,32 @@ public class VersionGroupJoinAction implements Serializable {
     @Getter
     @Setter
     private String projectSlug;
+
+    @RequestParameter
+    private String[] slugParam;
+
+    @Getter
+    @Setter
+    private String searchTerm = "";
+
+    @Getter
+    @Setter
+    private boolean selectAll = false;
+
+    private List<SelectableHProject> searchResults;
+
+    public boolean isParamExists() {
+        return slugParam != null && slugParam.length != 0;
+    }
+
+    public void selectAll() {
+        for (SelectableHProject selectableVersion : getSearchResults()) {
+            if (!isVersionInGroup(selectableVersion.getProjectIteration()
+                .getId())) {
+                selectableVersion.setSelected(selectAll);
+            }
+        }
+    }
 
     public void searchMaintainedProjectVersion() {
         Set<HProject> maintainedProjects =
@@ -176,4 +209,71 @@ public class VersionGroupJoinAction implements Serializable {
         }
         return queryBuilder.toString();
     }
+
+    /**
+     * Run search on unique project version if projectSlug, iterationSlug exits
+     * else search versions available
+     */
+    public void executePreSearch() {
+        if (isParamExists()) {
+            for (String param : slugParam) {
+                String[] paramSet = param.split(":");
+
+                if (paramSet.length == 2) {
+                    HProjectIteration projectVersion =
+                            versionGroupServiceImpl.getProjectIterationBySlug(
+                                    paramSet[0], paramSet[1]);
+                    if (projectVersion != null) {
+                        getSearchResults().add(
+                                new SelectableHProject(projectVersion, true));
+                    }
+                }
+            }
+        } else {
+            searchProjectAndVersion();
+        }
+
+    }
+
+    @Transactional
+    @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
+    private void joinVersionGroup(Long projectIterationId) {
+        versionGroupServiceImpl.joinVersionGroup(group.getSlug(),
+                projectIterationId);
+    }
+
+    @Transactional
+    @Restrict("#{s:hasPermission(versionGroupHomeAction.instance, 'update')}")
+    public void leaveVersionGroup(Long projectIterationId) {
+        versionGroupServiceImpl.leaveVersionGroup(group.getSlug(),
+                projectIterationId);
+        searchProjectAndVersion();
+    }
+
+    public void searchProjectAndVersion() {
+        getSearchResults().clear();
+        List<HProjectIteration> result =
+                versionGroupServiceImpl
+                        .searchLikeSlugOrProjectSlug(this.searchTerm);
+        for (HProjectIteration version : result) {
+            getSearchResults().add(new SelectableHProject(version, false));
+        }
+    }
+
+    public void addSelected() {
+        for (SelectableHProject selectableVersion : getSearchResults()) {
+            if (selectableVersion.isSelected()) {
+                joinVersionGroup(selectableVersion.getProjectIteration()
+                        .getId());
+            }
+        }
+    }
+
+    public List<SelectableHProject> getSearchResults() {
+        if (searchResults == null) {
+            searchResults = new ArrayList<SelectableHProject>();
+        }
+        return searchResults;
+    }
+
 }

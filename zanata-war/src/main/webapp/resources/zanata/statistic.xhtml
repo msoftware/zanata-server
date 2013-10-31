@@ -9,7 +9,8 @@
 <composite:interface>
   <composite:attribute name="value"
     type="org.zanata.common.statistic.WordStatistic" required="true"/>
-  <composite:attribute name="type" shortDescription="Type of statistic bar, 'large' or leave empty for default"/>
+  <composite:attribute name="type"
+    shortDescription="Type of statistic bar, 'large' or leave empty for default"/>
 </composite:interface>
 <composite:implementation>
   <s:fragment rendered="#{cc.attrs.value != ''}">
@@ -39,27 +40,22 @@
           value="#{cc.attrs.value.percentUntranslated}"/>
 
         <span class="progress-bar__translated"
-          title="#{translated_percentage}% #{messages['jsf.stats.Translated']}"
           style="width: #{translated_percentage}%;">
         <span class="is-invisible"> #{messages['jsf.stats.Translated']}</span>
         </span>
         <span class="progress-bar__fuzzy"
-          title="#{fuzzy_percentage}% #{messages['jsf.stats.Fuzzy']}"
           style="width: #{fuzzy_percentage}%; margin-left: #{translated_percentage}%;">
           <span class="is-invisible">#{messages['jsf.stats.Fuzzy']}</span>
         </span>
         <span class="progress-bar__rejected"
-          title="#{rejected_percentage}% #{messages['jsf.stats.Rejected']}"
           style="width: #{rejected_percentage}%; margin-left: #{translated_percentage + fuzzy_percentage}%;">
           <span class="is-invisible">#{messages['jsf.stats.Rejected']}</span>
         </span>
         <span class="progress-bar__approved"
-          title="#{approved_percentage}% #{messages['jsf.stats.Approved']}"
           style="width: #{approved_percentage}%;">
           <span class="is-invisible">#{messages['jsf.stats.Approved']}</span>
         </span>
         <span class="progress-bar__untranslated"
-          title="#{untranslated_percentage}% #{messages['jsf.stats.Untranslated']}"
           style="width: #{untranslated_percentage}%; margin-left: #{translated_percentage + fuzzy_percentage + rejected_percentage + approved_percentage}%">
           <span
             class="is-invisible">#{messages['jsf.stats.Untranslated']}</span>

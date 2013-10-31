@@ -37,9 +37,11 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.annotation.CachedMethodResult;
 import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordStatistic;
+import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
@@ -67,6 +69,9 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Getter
     @Setter
     private boolean pageRendered = false;
+
+    @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
+    HAccount authenticatedAccount;
 
     @In
     private LocaleService localeServiceImpl;
@@ -134,6 +139,13 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     }
 
     @CachedMethodResult
+    public String getTranslatedPercentage(LocaleId localeId) {
+        WordStatistic statistic = getStatisticForLocale(localeId);
+        return StatisticsUtil
+                .formatPercentage(statistic.getPercentTranslated());
+    }
+
+    @CachedMethodResult
     public WordStatistic getStatisticForLocale(LocaleId localeId) {
         WordStatistic statistic = new WordStatistic();
         for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
@@ -167,7 +179,8 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                     .getRemainingHours(wordStatistic));
 
             int totalWordCount = getTotalWordsCountForGroup();
-            int totalMessageCount = groupStatisticServiceImpl.getTotalMessageCount(slug);
+            int totalMessageCount =
+                    groupStatisticServiceImpl.getTotalMessageCount(slug);
 
             overallStatistics =
                     new OverallStatistics(totalWordCount, totalMessageCount,
@@ -175,6 +188,11 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
         }
         return overallStatistics;
+    }
+
+    public boolean isUserProjectMaintainer() {
+        return authenticatedAccount != null
+                && authenticatedAccount.getPerson().isMaintainerOfProjects();
     }
 
     /**

@@ -1,5 +1,10 @@
 package org.zanata.util;
 
+import java.io.Serializable;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.zanata.common.AbstractTranslationCount;
 import org.zanata.common.ContentState;
 import org.zanata.common.TransUnitWords;
@@ -10,9 +15,9 @@ import org.zanata.rest.dto.stats.TranslationStatistics;
  * @author Patrick Huang <a
  *         href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
-public class StatisticsUtil {
-    private StatisticsUtil() {
-    }
+//@Name("statisticsUtil")
+//@Scope(ScopeType.APPLICATION)
+public class StatisticsUtil implements Serializable {
 
     public static int calculateUntranslated(Long totalCount,
             AbstractTranslationCount translationCount) {
@@ -40,6 +45,14 @@ public class StatisticsUtil {
         return getRemainingHours(transUnitWords.getTranslated(),
                 transUnitWords.getUntranslated(),
                 transUnitWords.getNeedReview());
+    }
+
+    public static String formatPercentage(double percentage) {
+        return String.valueOf(Math.floor(percentage));
+    }
+
+    public static String formatHours(double hours) {
+        return String.valueOf(Math.ceil(hours * 100.0) / 100);
     }
 
     private static double getRemainingHours(double translated,

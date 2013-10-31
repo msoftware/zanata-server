@@ -408,9 +408,6 @@
     <param name="versionGroupSlug" value="#{versionGroupHomeAction.slug}" />
 
     <action execute="#{versionGroupHomeAction.validateSuppliedId}" />
-    <action execute="#{versionGroupAction.init(versionGroupSlug)}" />
-    <action execute="#{versionGroupAction.executePreSearch()}"
-      on-postback="false" />
   </page>
 
   <page view-id="/version-group/settings.xhtml" login-required="true">
@@ -421,6 +418,8 @@
       execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
 
     <action execute="#{versionGroupMaintainerAction.init()}" />
+    <action execute="#{versionGroupJoinAction.executePreSearch()}"
+      on-postback="false" />
 
     <navigation from-action="#{versionGroupHome.update}">
       <redirect view-id="/version-group/version_group.xhtml">
