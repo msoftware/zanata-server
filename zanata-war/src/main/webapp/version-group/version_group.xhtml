@@ -60,14 +60,14 @@
         <li class="g__item">
           <span class="stats--large txt--state-success">
             <span
-              class="stats__figure">#{versionGroupHomeAction.getOverallStatistic().statistic.percentTranslated}%</span>
+              class="stats__figure">#{statisticBar.formatPercentage(versionGroupHomeAction.getOverallStatistic().statistic.percentTranslated)}%</span>
             <span class="stats__unit">#{messages['jsf.stats.Translated']}</span>
           </span>
         </li>
         <li class="g__item">
           <span class="stats--large">
             <span
-              class="stats__figure">#{versionGroupHomeAction.getOverallStatistic().statistic.remainingHours}</span>
+              class="stats__figure">#{statisticBar.formatHours(versionGroupHomeAction.getOverallStatistic().statistic.remainingHours)}</span>
             <span
               class="stats__unit">#{messages['jsf.stats.TotalHoursRemaining']}</span>
           </span>
