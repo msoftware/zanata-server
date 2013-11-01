@@ -22,6 +22,7 @@ package org.zanata.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +71,10 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Setter
     private boolean pageRendered = false;
 
+    @Getter
+    @Setter
+    private HLocale selectedLocale;
+
     @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
     HAccount authenticatedAccount;
 
@@ -85,37 +90,112 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     private Map<VersionLocaleKey, WordStatistic> statisticMap;
 
-    @Override
-    protected HIterationGroup loadInstance() {
-        Session session = (Session) getEntityManager().getDelegate();
-        return (HIterationGroup) session.byNaturalId(HIterationGroup.class)
-                .using("slug", getSlug()).load();
+    private List<SortingType> languageSortingList;
+
+    private List<SortingType> projectSortingList;
+
+    public List<SortingType> getLanguageSortingList() {
+        if (languageSortingList == null) {
+            languageSortingList = Lists.newArrayList();
+            SortingType percentageType = SortingType.getPercentageType();
+            percentageType.setActive(true);
+
+            languageSortingList.add(percentageType);
+            languageSortingList.add(SortingType.getHoursType());
+            languageSortingList.add(SortingType.getWordsType());
+            languageSortingList.add(SortingType.getAlphabeticalType());
+        }
+        return languageSortingList;
     }
 
-    public List<HProjectIteration> getInstanceProjectIterations() {
-        return new ArrayList<HProjectIteration>(getInstance()
-                .getProjectIterations());
+    public List<SortingType> getProjectSortingList() {
+        if (projectSortingList == null) {
+            projectSortingList = Lists.newArrayList();
+            SortingType percentageType = SortingType.getPercentageType();
+            percentageType.setActive(true);
+
+            projectSortingList.add(percentageType);
+            projectSortingList.add(SortingType.getHoursType());
+            projectSortingList.add(SortingType.getWordsType());
+            projectSortingList.add(SortingType.getAlphabeticalType());
+        }
+        return projectSortingList;
     }
 
-    @Override
-    public NaturalIdentifier getNaturalId() {
-        return Restrictions.naturalId().set("slug", slug);
+    private class LanguageComparator implements Comparator<LocaleItem> {
+        @Setter
+        private SortingType sortingType;
+
+        public LanguageComparator(SortingType sortingType) {
+            this.sortingType = sortingType;
+        }
+
+        @Override
+        public int compare(LocaleItem localeItem, LocaleItem localeItem2) {
+            final LocaleItem item1, item2;
+
+            if (sortingType.isDescending()) {
+                item1 = localeItem;
+                item2 = localeItem2;
+            } else {
+                item1 = localeItem2;
+                item2 = localeItem;
+            }
+
+            // Need to get statistic for comparison
+            if (!sortingType.equals(SortingType.ALPHABETICAL)) {
+                WordStatistic wordStatistic1 =
+                        getStatisticForLocale(item1.getLocale().getLocaleId());
+                WordStatistic wordStatistic2 =
+                        getStatisticForLocale(item2.getLocale().getLocaleId());
+
+                if (sortingType.equals(SortingType.PERCENTAGE)) {
+                    return Double.compare(
+                            wordStatistic1.getPercentTranslated(),
+                            wordStatistic2.getPercentTranslated());
+                } else if (sortingType.equals(SortingType.HOURS)) {
+                    return Double.compare(wordStatistic1.getRemainingHours(),
+                            wordStatistic2.getRemainingHours());
+                } else if (sortingType.equals(SortingType.WORDS)) {
+                    return Integer.compare(wordStatistic1.getTotal(),
+                            wordStatistic2.getTotal());
+                }
+            } else {
+                return item1.getLocale().retrieveDisplayName()
+                        .compareTo(item2.getLocale().retrieveDisplayName());
+            }
+            return 0;
+        }
     }
 
-    @Override
-    public boolean isIdDefined() {
-        return slug != null;
+    private LanguageComparator languageComparator = new LanguageComparator(
+            getSelectedSortType(getLanguageSortingList()));
+
+    public void sortLanguageList(SortingType sortingType) {
+        toggleSortingList(sortingType, getLanguageSortingList());
+        languageComparator.setSortingType(sortingType);
+        Collections.sort(activeLocales, languageComparator);
     }
 
-    @Override
-    public Object getId() {
-        return slug;
+    private SortingType getSelectedSortType(List<SortingType> list) {
+        for (SortingType sortingType : list) {
+            if (sortingType.isActive()) {
+                return sortingType;
+            }
+        }
+        return null;
     }
 
-    public void validateSuppliedId() {
-        getInstance(); // this will raise an EntityNotFound exception
-        // when id is invalid and conversation will not
-        // start
+    private void toggleSortingList(SortingType selectedSortingType,
+            List<SortingType> list) {
+        for (SortingType sortingType : list) {
+            if (sortingType.equals(selectedSortingType)) {
+                sortingType.setActive(true);
+                sortingType.setDescending(!sortingType.isDescending());
+            } else {
+                sortingType.setActive(false);
+            }
+        }
     }
 
     public List<LocaleItem> getActiveLocales() {
@@ -134,7 +214,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                 }
             }
         }
-        Collections.sort(activeLocales);
+        Collections.sort(activeLocales, languageComparator);
         return activeLocales;
     }
 
@@ -180,7 +260,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
             int totalWordCount = getTotalWordsCountForGroup();
             int totalMessageCount =
-                    groupStatisticServiceImpl.getTotalMessageCount(slug);
+                    groupStatisticServiceImpl.getTotalMessageCount(getSlug());
 
             overallStatistics =
                     new OverallStatistics(totalWordCount, totalMessageCount,
@@ -195,10 +275,15 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                 && authenticatedAccount.getPerson().isMaintainerOfProjects();
     }
 
+    public WordStatistic getStatisticForSelectedLocale(Long versionId) {
+        return getStatisticMap().get(
+                new VersionLocaleKey(versionId, selectedLocale.getLocaleId()));
+    }
+
     /**
      * Load up statistics for all project versions in all active locales in the
      * group
-     *
+     * 
      * @return
      */
     private Map<VersionLocaleKey, WordStatistic> getStatisticMap() {
@@ -207,7 +292,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
             for (LocaleItem localeItem : getActiveLocales()) {
                 statisticMap.putAll(groupStatisticServiceImpl
-                        .getLocaleStatistic(slug, localeItem.getLocale()
+                        .getLocaleStatistic(getSlug(), localeItem.getLocale()
                                 .getLocaleId()));
             }
         }
@@ -218,8 +303,41 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Getter
     @Setter
     public final class OverallStatistics {
-        int totalWordCount;
-        int totalMessageCount;
-        WordStatistic statistic;
+        private int totalWordCount;
+        private int totalMessageCount;
+        private WordStatistic statistic;
+    }
+
+    @Override
+    protected HIterationGroup loadInstance() {
+        Session session = (Session) getEntityManager().getDelegate();
+        return (HIterationGroup) session.byNaturalId(HIterationGroup.class)
+                .using("slug", getSlug()).load();
+    }
+
+    public List<HProjectIteration> getInstanceProjectIterations() {
+        return new ArrayList<HProjectIteration>(getInstance()
+                .getProjectIterations());
+    }
+
+    @Override
+    public NaturalIdentifier getNaturalId() {
+        return Restrictions.naturalId().set("slug", slug);
+    }
+
+    @Override
+    public boolean isIdDefined() {
+        return slug != null;
+    }
+
+    @Override
+    public Object getId() {
+        return slug;
+    }
+
+    public void validateSuppliedId() {
+        getInstance(); // this will raise an EntityNotFound exception
+        // when id is invalid and conversation will not
+        // start
     }
 }

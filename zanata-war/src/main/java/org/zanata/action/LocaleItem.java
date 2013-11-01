@@ -1,5 +1,7 @@
 package org.zanata.action;
 
+import java.util.Comparator;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +12,7 @@ import org.zanata.model.HLocale;
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
  */
 @AllArgsConstructor
-public class LocaleItem implements Comparable<LocaleItem> {
+public class LocaleItem {
     @Getter
     @Setter
     private boolean selected;
@@ -19,9 +21,17 @@ public class LocaleItem implements Comparable<LocaleItem> {
     @Setter
     private HLocale locale;
 
-    @Override
-    public int compareTo(LocaleItem localeItem) {
-        return this.getLocale().retrieveDisplayName()
-                .compareTo(localeItem.getLocale().retrieveDisplayName());
-    }
+    public static final Comparator<LocaleItem> Comparator =
+            new Comparator<LocaleItem>() {
+                @Override
+                public int
+                        compare(LocaleItem localeItem, LocaleItem localeItem2) {
+                    return localeItem
+                            .getLocale()
+                            .retrieveDisplayName()
+                            .compareTo(
+                                    localeItem2.getLocale()
+                                            .retrieveDisplayName());
+                }
+            };
 }

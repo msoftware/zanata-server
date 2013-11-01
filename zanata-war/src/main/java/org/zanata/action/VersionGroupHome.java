@@ -34,10 +34,8 @@ import lombok.Setter;
 import org.hibernate.Session;
 import org.hibernate.criterion.NaturalIdentifier;
 import org.hibernate.criterion.Restrictions;
-import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
@@ -77,39 +75,6 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     private List<SelectItem> statusList;
 
     private List<LocaleItem> activeLocales;
-
-    @Override
-    protected HIterationGroup loadInstance() {
-        Session session = (Session) getEntityManager().getDelegate();
-        return (HIterationGroup) session.byNaturalId(HIterationGroup.class)
-                .using("slug", getSlug()).load();
-    }
-
-    public List<HProjectIteration> getInstanceProjectIterations() {
-        return new ArrayList<HProjectIteration>(getInstance()
-                .getProjectIterations());
-    }
-
-    @Override
-    public NaturalIdentifier getNaturalId() {
-        return Restrictions.naturalId().set("slug", slug);
-    }
-
-    @Override
-    public boolean isIdDefined() {
-        return slug != null;
-    }
-
-    @Override
-    public Object getId() {
-        return slug;
-    }
-
-    public void validateSuppliedId() {
-        getInstance(); // this will raise an EntityNotFound exception
-        // when id is invalid and conversation will not
-        // start
-    }
 
     public void verifySlugAvailable(ValueChangeEvent e) {
         String slug = (String) e.getNewValue();
@@ -176,7 +141,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 }
             }
         }
-        Collections.sort(activeLocales);
+        Collections.sort(activeLocales, LocaleItem.Comparator);
         return activeLocales;
     }
 
@@ -205,5 +170,38 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                             }));
         }
         return statusList;
+    }
+
+    @Override
+    protected HIterationGroup loadInstance() {
+        Session session = (Session) getEntityManager().getDelegate();
+        return (HIterationGroup) session.byNaturalId(HIterationGroup.class)
+                .using("slug", getSlug()).load();
+    }
+
+    public List<HProjectIteration> getInstanceProjectIterations() {
+        return new ArrayList<HProjectIteration>(getInstance()
+                .getProjectIterations());
+    }
+
+    @Override
+    public NaturalIdentifier getNaturalId() {
+        return Restrictions.naturalId().set("slug", slug);
+    }
+
+    @Override
+    public boolean isIdDefined() {
+        return slug != null;
+    }
+
+    @Override
+    public Object getId() {
+        return slug;
+    }
+
+    public void validateSuppliedId() {
+        getInstance(); // this will raise an EntityNotFound exception
+        // when id is invalid and conversation will not
+        // start
     }
 }
