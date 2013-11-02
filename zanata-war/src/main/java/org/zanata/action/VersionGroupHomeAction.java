@@ -86,44 +86,43 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     private OverallStatistics overallStatistics;
 
-    private List<LocaleItem> activeLocales;
+    private List<HLocale> activeLocales;
+
+    private List<HProjectIteration> projectIterations;
 
     private Map<VersionLocaleKey, WordStatistic> statisticMap;
 
-    private List<SortingType> languageSortingList;
+    private SortingType languageSortingList;
 
-    private List<SortingType> projectSortingList;
+    private SortingType projectSortingList;
 
-    public List<SortingType> getLanguageSortingList() {
+    private final LanguageComparator languageComparator =
+            new LanguageComparator(getLanguageSortingList());
+
+    private final VersionComparator versionComparator = new VersionComparator(
+            getProjectSortingList());
+
+    public SortingType getLanguageSortingList() {
         if (languageSortingList == null) {
-            languageSortingList = Lists.newArrayList();
-            SortingType percentageType = SortingType.getPercentageType();
-            percentageType.setActive(true);
-
-            languageSortingList.add(percentageType);
-            languageSortingList.add(SortingType.getHoursType());
-            languageSortingList.add(SortingType.getWordsType());
-            languageSortingList.add(SortingType.getAlphabeticalType());
+            languageSortingList =
+                    new SortingType(Lists.newArrayList(
+                            SortingType.ALPHABETICAL, SortingType.HOURS,
+                            SortingType.PERCENTAGE));
         }
         return languageSortingList;
     }
 
-    public List<SortingType> getProjectSortingList() {
+    public SortingType getProjectSortingList() {
         if (projectSortingList == null) {
-            projectSortingList = Lists.newArrayList();
-            SortingType percentageType = SortingType.getPercentageType();
-            percentageType.setActive(true);
-
-            projectSortingList.add(percentageType);
-            projectSortingList.add(SortingType.getHoursType());
-            projectSortingList.add(SortingType.getWordsType());
-            projectSortingList.add(SortingType.getAlphabeticalType());
+            projectSortingList =
+                    new SortingType(Lists.newArrayList(
+                            SortingType.ALPHABETICAL, SortingType.HOURS,
+                            SortingType.PERCENTAGE, SortingType.WORDS));
         }
         return projectSortingList;
     }
 
-    private class LanguageComparator implements Comparator<LocaleItem> {
-        @Setter
+    private class LanguageComparator implements Comparator<HLocale> {
         private SortingType sortingType;
 
         public LanguageComparator(SortingType sortingType) {
@@ -131,88 +130,115 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         }
 
         @Override
-        public int compare(LocaleItem localeItem, LocaleItem localeItem2) {
-            final LocaleItem item1, item2;
+        public int compare(HLocale locale, HLocale locale2) {
+            final HLocale item1, item2;
 
             if (sortingType.isDescending()) {
-                item1 = localeItem;
-                item2 = localeItem2;
+                item1 = locale;
+                item2 = locale2;
             } else {
-                item1 = localeItem2;
-                item2 = localeItem;
+                item1 = locale2;
+                item2 = locale;
             }
 
+            String selectedSortOption = sortingType.getSelectedSortOption();
             // Need to get statistic for comparison
-            if (!sortingType.equals(SortingType.ALPHABETICAL)) {
+            if (!selectedSortOption.equals(SortingType.ALPHABETICAL)) {
                 WordStatistic wordStatistic1 =
-                        getStatisticForLocale(item1.getLocale().getLocaleId());
+                        getStatisticForLocale(item1.getLocaleId());
                 WordStatistic wordStatistic2 =
-                        getStatisticForLocale(item2.getLocale().getLocaleId());
+                        getStatisticForLocale(item2.getLocaleId());
 
-                if (sortingType.equals(SortingType.PERCENTAGE)) {
+                if (selectedSortOption.equals(SortingType.PERCENTAGE)) {
                     return Double.compare(
                             wordStatistic1.getPercentTranslated(),
                             wordStatistic2.getPercentTranslated());
-                } else if (sortingType.equals(SortingType.HOURS)) {
+                } else if (selectedSortOption.equals(SortingType.HOURS)) {
                     return Double.compare(wordStatistic1.getRemainingHours(),
                             wordStatistic2.getRemainingHours());
-                } else if (sortingType.equals(SortingType.WORDS)) {
-                    return Integer.compare(wordStatistic1.getTotal(),
-                            wordStatistic2.getTotal());
                 }
             } else {
-                return item1.getLocale().retrieveDisplayName()
-                        .compareTo(item2.getLocale().retrieveDisplayName());
+                return item1.retrieveDisplayName().compareTo(
+                        item2.retrieveDisplayName());
             }
             return 0;
         }
     }
 
-    private LanguageComparator languageComparator = new LanguageComparator(
-            getSelectedSortType(getLanguageSortingList()));
+    private class VersionComparator implements Comparator<HProjectIteration> {
+        private SortingType sortingType;
 
-    public void sortLanguageList(SortingType sortingType) {
-        toggleSortingList(sortingType, getLanguageSortingList());
-        languageComparator.setSortingType(sortingType);
+        public VersionComparator(SortingType sortingType) {
+            this.sortingType = sortingType;
+        }
+
+        @Override
+        public int compare(HProjectIteration locale, HProjectIteration locale2) {
+            final HProjectIteration item1, item2;
+
+            if (sortingType.isDescending()) {
+                item1 = locale;
+                item2 = locale2;
+            } else {
+                item1 = locale2;
+                item2 = locale;
+            }
+
+            String selectedSortOption = sortingType.getSelectedSortOption();
+            // Need to get statistic for comparison
+            if (!selectedSortOption.equals(SortingType.ALPHABETICAL)) {
+                WordStatistic wordStatistic1 =
+                        getStatisticMap().get(
+                                new VersionLocaleKey(item1.getId(),
+                                        selectedLocale.getLocaleId()));
+                WordStatistic wordStatistic2 =
+                        getStatisticMap().get(
+                                new VersionLocaleKey(item2.getId(),
+                                        selectedLocale.getLocaleId()));
+
+                if (selectedSortOption.equals(SortingType.PERCENTAGE)) {
+                    return Double.compare(
+                            wordStatistic1.getPercentTranslated(),
+                            wordStatistic2.getPercentTranslated());
+                } else if (selectedSortOption.equals(SortingType.HOURS)) {
+                    return Double.compare(wordStatistic1.getRemainingHours(),
+                            wordStatistic2.getRemainingHours());
+                } else if (selectedSortOption.equals(SortingType.WORDS)) {
+                    return Integer.compare(wordStatistic1.getTotal(),
+                            wordStatistic2.getTotal());
+                }
+            } else {
+                return item1.getProject().getName()
+                        .compareTo(item2.getProject().getName());
+            }
+            return 0;
+        }
+    }
+
+    public void sortLanguageList(String sortOption) {
+        if (getLanguageSortingList().getSelectedSortOption().equals(sortOption)) {
+            getLanguageSortingList().setDescending(
+                    !getLanguageSortingList().isDescending());
+        }
+        getLanguageSortingList().setSelectedSortOption(sortOption);
         Collections.sort(activeLocales, languageComparator);
     }
 
-    private SortingType getSelectedSortType(List<SortingType> list) {
-        for (SortingType sortingType : list) {
-            if (sortingType.isActive()) {
-                return sortingType;
-            }
+    public void sortProjectList(String sortOption) {
+        if (getProjectSortingList().getSelectedSortOption().equals(sortOption)) {
+            getProjectSortingList().setDescending(
+                    !getProjectSortingList().isDescending());
         }
-        return null;
+        getProjectSortingList().setSelectedSortOption(sortOption);
+        Collections.sort(projectIterations, versionComparator);
     }
 
-    private void toggleSortingList(SortingType selectedSortingType,
-            List<SortingType> list) {
-        for (SortingType sortingType : list) {
-            if (sortingType.equals(selectedSortingType)) {
-                sortingType.setActive(true);
-                sortingType.setDescending(!sortingType.isDescending());
-            } else {
-                sortingType.setActive(false);
-            }
-        }
-    }
-
-    public List<LocaleItem> getActiveLocales() {
+    public List<HLocale> getActiveLocales() {
         if (activeLocales == null) {
-            activeLocales = Lists.newArrayList();
-
-            List<HLocale> supportedLocales =
-                    localeServiceImpl.getSupportedLocales();
             Set<HLocale> groupActiveLocales =
                     localeServiceImpl.getGroupActiveLocales(getInstance()
                             .getSlug());
-
-            for (HLocale locale : supportedLocales) {
-                if (groupActiveLocales.contains(locale)) {
-                    activeLocales.add(new LocaleItem(true, locale));
-                }
-            }
+            activeLocales = Lists.newArrayList(groupActiveLocales);
         }
         Collections.sort(activeLocales, languageComparator);
         return activeLocales;
@@ -234,6 +260,8 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                 statistic.add(entry.getValue());
             }
         }
+        statistic
+                .setRemainingHours(StatisticsUtil.getRemainingHours(statistic));
         return statistic;
     }
 
@@ -290,10 +318,9 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         if (statisticMap == null) {
             statisticMap = Maps.newHashMap();
 
-            for (LocaleItem localeItem : getActiveLocales()) {
+            for (HLocale locale : getActiveLocales()) {
                 statisticMap.putAll(groupStatisticServiceImpl
-                        .getLocaleStatistic(getSlug(), localeItem.getLocale()
-                                .getLocaleId()));
+                        .getLocaleStatistic(getSlug(), locale.getLocaleId()));
             }
         }
         return statisticMap;
@@ -315,9 +342,14 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
                 .using("slug", getSlug()).load();
     }
 
-    public List<HProjectIteration> getInstanceProjectIterations() {
-        return new ArrayList<HProjectIteration>(getInstance()
-                .getProjectIterations());
+    public List<HProjectIteration> getProjectIterations() {
+        if (projectIterations == null) {
+            projectIterations =
+                    new ArrayList<HProjectIteration>(getInstance()
+                            .getProjectIterations());
+        }
+        Collections.sort(projectIterations, versionComparator);
+        return projectIterations;
     }
 
     @Override
