@@ -298,12 +298,10 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         return overallStatistics;
     }
 
-    public boolean isUserProjectMaintainer() {
-        return authenticatedAccount != null
-                && authenticatedAccount.getPerson().isMaintainerOfProjects();
-    }
 
-    public WordStatistic getStatisticForSelectedLocale(Long versionId) {
+
+    @CachedMethodResult
+    public WordStatistic getSelectedLocaleStatistic(Long versionId) {
         return getStatisticMap().get(
                 new VersionLocaleKey(versionId, selectedLocale.getLocaleId()));
     }

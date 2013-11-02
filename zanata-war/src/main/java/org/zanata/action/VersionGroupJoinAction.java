@@ -248,4 +248,9 @@ public class VersionGroupJoinAction implements Serializable {
             }
         }
     }
+
+    public boolean isUserProjectMaintainer() {
+        return authenticatedAccount != null
+                && authenticatedAccount.getPerson().isMaintainerOfProjects();
+    }
 }

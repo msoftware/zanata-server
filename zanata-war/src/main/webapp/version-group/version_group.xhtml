@@ -190,7 +190,7 @@
                   class="progress-bar__expander l--pad-top-quarter panels__panel__item">
                   <a4j:commandLink
                     action="#{versionGroupHomeAction.setSelectedLocale(locale)}"
-                    render="projects_list">
+                    render="project_list,selected_locale">
                     <div class="list__item">
                       <div class="list__item__info">
                         <span class="list__title">
@@ -226,54 +226,60 @@
         </div>
       </div>
       <div class="g__item w--1-2 w--1-2-s panels__panel is-active">
-        <s:div styleClass="bg--pop-higher" id="projects_list">
-          <s:fragment
-            rendered="#{versionGroupHomeAction.selectedLocale != null}">
-            <div class="panels__panel__header">
-              <div class="g--tight">
-                <div class="g__item w--1-2 w--1-2-s">
-                  <h2 class="heading--secondary epsilon">
-                    <span class="is-hidden--l-up">
-                      <a href="#">#{messages['jsf.Languages']}</a>
-                      <i class="i i--arrow-right"></i>
-                    </span>
-                    <i class="i i--project l--push-right-quarter"></i>
-                    #{versionGroupHomeAction.selectedLocale.retrieveDisplayName()} #{messages['Projects']}
-                  </h2>
-                </div>
+        <div class="bg--pop-higher">
+          <div class="panels__panel__header">
+            <div class="g--tight">
+              <div class="g__item w--1-2 w--1-2-s">
+                <h2 class="heading--secondary epsilon">
+                  <span class="is-hidden--l-up">
+                    <a href="#">#{messages['jsf.Languages']}</a>
+                    <i class="i i--arrow-right"></i>
+                  </span>
+                  <i class="i i--project l--push-right-quarter"></i>
+                  <a4j:outputPanel id="selected_locale">
+                    <s:fragment
+                      rendered="#{versionGroupHomeAction.selectedLocale != null}">
+                      #{versionGroupHomeAction.selectedLocale.retrieveDisplayName()}
+                    </s:fragment>
+                  </a4j:outputPanel>
+                  #{messages['Projects']}
+                </h2>
+              </div>
+              <div
+                class="g__item w--1-2 w--1-2-s txt--align-right txt--s-align-right">
                 <div
-                  class="g__item w--1-2 w--1-2-s txt--align-right txt--s-align-right">
-                  <div
-                    class="dropdown dropdown--small dropdown--right dropdown--inline">
-                    <a class="dropdown__toggle" href="#">
-                      <a4j:outputPanel id="selected_project_sort">
-                        #{versionGroupHomeAction.projectSortingList.selectedSortOption}
-                      </a4j:outputPanel>
-                      <i class="i i--arrow-down dropdown__toggle__icon"></i>
-                    </a>
-                    <h:form>
-                      <ul class="dropdown__content" role="content"
-                        aria-labelledby="dropdownContent">
-                        <li class="dropdown__header txt--uppercase">
-                          #{messages['jsf.Sort']}
+                  class="dropdown dropdown--small dropdown--right dropdown--inline">
+                  <a class="dropdown__toggle" href="#">
+                    <a4j:outputPanel id="selected_project_sort">
+                      #{versionGroupHomeAction.projectSortingList.selectedSortOption}
+                    </a4j:outputPanel>
+                    <i class="i i--arrow-down dropdown__toggle__icon"></i>
+                  </a>
+                  <h:form>
+                    <ul class="dropdown__content" role="content"
+                      aria-labelledby="dropdownContent">
+                      <li class="dropdown__header txt--uppercase">
+                        #{messages['jsf.Sort']}
+                      </li>
+                      <ui:repeat
+                        value="#{versionGroupHomeAction.projectSortingList.sortOptions}"
+                        var="sortOption">
+                        <li>
+                          <a4j:commandLink
+                            action="#{versionGroupHomeAction.sortProjectList(sortOption)}"
+                            styleClass="#{versionGroupHomeAction.projectSortingList.selectedSortOption eq sortOption ? 'is-active' : ''}"
+                            render="selected_project_sort,project_list">#{sortOption}</a4j:commandLink>
                         </li>
-                        <ui:repeat
-                          value="#{versionGroupHomeAction.projectSortingList.sortOptions}"
-                          var="sortOption">
-                          <li>
-                            <a4j:commandLink
-                              action="#{versionGroupHomeAction.sortProjectList(sortOption)}"
-                              styleClass="#{versionGroupHomeAction.projectSortingList.selectedSortOption eq sortOption ? 'is-active' : ''}"
-                              render="selected_project_sort,project_content_list">#{sortOption}</a4j:commandLink>
-                          </li>
-                        </ui:repeat>
-                      </ul>
-                    </h:form>
-                  </div>
+                      </ui:repeat>
+                    </ul>
+                  </h:form>
                 </div>
               </div>
             </div>
-            <h:form id="project_content_list">
+          </div>
+          <h:form id="project_list">
+            <s:fragment
+              rendered="#{versionGroupHomeAction.selectedLocale != null}">
               <ul class="list--stats">
                 <ui:repeat
                   value="#{versionGroupHomeAction.getProjectIterations()}"
@@ -289,20 +295,22 @@
                         </div>
                         <div class="list__item__stats">
                           <span class="stats--small">
-                            <span class="stats__figure">120.2</span>
+                            <span class="stats__figure">
+                              ${versionGroupHomeAction.getSelectedLocaleStatistic(version.id).remainingHours}
+                            </span>
                             <span class="stats__unit">hours remaining</span>
                           </span>
                         </div>
                       </div>
                       <zanata:statistic
-                        value="${versionGroupHomeAction.getStatisticForSelectedLocale(version.id)}"/>
+                        value="${versionGroupHomeAction.getSelectedLocaleStatistic(version.id)}"/>
                     </a>
                   </li>
                 </ui:repeat>
               </ul>
-            </h:form>
-          </s:fragment>
-        </s:div>
+            </s:fragment>
+          </h:form>
+        </div>
       </div>
     </div>
   </div>
