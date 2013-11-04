@@ -26,7 +26,6 @@ public class SortingType implements Serializable {
     private boolean descending = true;
 
     @Getter
-    @Setter
     private String selectedSortOption = ALPHABETICAL;
 
     @Getter
@@ -34,5 +33,12 @@ public class SortingType implements Serializable {
 
     public SortingType(List<String> sortOptions) {
         this.sortOptions = sortOptions;
+    }
+
+    public void setSelectedSortOption(String selectedSortOption) {
+        if (this.selectedSortOption.equals(selectedSortOption)) {
+            descending = !descending;
+        }
+        this.selectedSortOption = selectedSortOption;
     }
 }

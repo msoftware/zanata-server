@@ -50,6 +50,7 @@ import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
 import org.zanata.service.VersionLocaleKey;
 import org.zanata.util.StatisticsUtil;
+import org.zanata.util.ZanataMessages;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -63,6 +64,18 @@ import com.google.common.collect.Maps;
 public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     private static final long serialVersionUID = 1L;
 
+    @In
+    private LocaleService localeServiceImpl;
+
+    @In
+    private GroupStatisticService groupStatisticServiceImpl;
+
+    @In
+    private ZanataMessages zanataMessages;
+
+    @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
+    private HAccount authenticatedAccount;
+
     @Getter
     @Setter
     private String slug;
@@ -75,14 +88,17 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Setter
     private HLocale selectedLocale;
 
-    @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
-    HAccount authenticatedAccount;
+    @Getter
+    @Setter
+    private String view = "tab-languages";
 
-    @In
-    private LocaleService localeServiceImpl;
+    public void setView(String view) {
+        this.view = view;
+    }
 
-    @In
-    private GroupStatisticService groupStatisticServiceImpl;
+    public String getView() {
+        return view;
+    }
 
     private OverallStatistics overallStatistics;
 
@@ -215,21 +231,16 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         }
     }
 
-    public void sortLanguageList(String sortOption) {
-        if (getLanguageSortingList().getSelectedSortOption().equals(sortOption)) {
-            getLanguageSortingList().setDescending(
-                    !getLanguageSortingList().isDescending());
-        }
-        getLanguageSortingList().setSelectedSortOption(sortOption);
+    public boolean isUserProjectMaintainer() {
+        return authenticatedAccount != null
+                && authenticatedAccount.getPerson().isMaintainerOfProjects();
+    }
+
+    public void sortLanguageList() {
         Collections.sort(activeLocales, languageComparator);
     }
 
-    public void sortProjectList(String sortOption) {
-        if (getProjectSortingList().getSelectedSortOption().equals(sortOption)) {
-            getProjectSortingList().setDescending(
-                    !getProjectSortingList().isDescending());
-        }
-        getProjectSortingList().setSelectedSortOption(sortOption);
+    public void sortProjectList() {
         Collections.sort(projectIterations, versionComparator);
     }
 
@@ -245,10 +256,27 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     }
 
     @CachedMethodResult
-    public String getTranslatedPercentage(LocaleId localeId) {
+    public String getStatisticFigure(String sortOption, LocaleId localeId) {
         WordStatistic statistic = getStatisticForLocale(localeId);
-        return StatisticsUtil
-                .formatPercentage(statistic.getPercentTranslated());
+
+        if (sortOption.equals(SortingType.HOURS)) {
+            return StatisticsUtil.formatHours(statistic.getRemainingHours());
+        } else if (sortOption.equals(SortingType.WORDS)) {
+            return String.valueOf(statistic.getTotal());
+        } else {
+            return StatisticsUtil.formatPercentage(statistic
+                    .getPercentTranslated()) + "%";
+        }
+    }
+
+    public String getStatisticUnit(String sortOption) {
+        if (sortOption.equals(SortingType.HOURS)) {
+            return zanataMessages.getMessage("jsf.stats.HoursRemaining");
+        } else if (sortOption.equals(SortingType.WORDS)) {
+            return zanataMessages.getMessage("jsf.Words");
+        } else {
+            return zanataMessages.getMessage("jsf.Translated");
+        }
     }
 
     @CachedMethodResult
@@ -297,8 +325,6 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         }
         return overallStatistics;
     }
-
-
 
     @CachedMethodResult
     public WordStatistic getSelectedLocaleStatistic(Long versionId) {
