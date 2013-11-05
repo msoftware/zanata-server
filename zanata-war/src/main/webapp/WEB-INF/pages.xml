@@ -406,7 +406,6 @@
 
   <page view-id="/version-group/version_group.xhtml">
     <param name="versionGroupSlug" value="#{versionGroupHomeAction.slug}" />
-
     <action execute="#{versionGroupHomeAction.validateSuppliedId}" />
   </page>
 

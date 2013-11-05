@@ -81,7 +81,6 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     private String slug;
 
     @Getter
-    @Setter
     private boolean pageRendered = false;
 
     @Getter
@@ -92,15 +91,8 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @Setter
     private String view = "tab-languages";
 
-    public void setView(String view) {
-        this.view = view;
-    }
-
-    public String getView() {
-        return view;
-    }
-
-    private OverallStatistics overallStatistics;
+    @Getter
+    private OverallStatistic overallStatistic;
 
     private List<HLocale> activeLocales;
 
@@ -117,6 +109,13 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     private final VersionComparator versionComparator = new VersionComparator(
             getProjectSortingList());
+
+    public void setPageRendered(boolean pageRendered) {
+        if (pageRendered) {
+            loadStatistic();
+        }
+        this.pageRendered = pageRendered;
+    }
 
     public SortingType getLanguageSortingList() {
         if (languageSortingList == null) {
@@ -204,13 +203,11 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
             // Need to get statistic for comparison
             if (!selectedSortOption.equals(SortingType.ALPHABETICAL)) {
                 WordStatistic wordStatistic1 =
-                        getStatisticMap().get(
-                                new VersionLocaleKey(item1.getId(),
-                                        selectedLocale.getLocaleId()));
+                        statisticMap.get(new VersionLocaleKey(item1.getId(),
+                                selectedLocale.getLocaleId()));
                 WordStatistic wordStatistic2 =
-                        getStatisticMap().get(
-                                new VersionLocaleKey(item2.getId(),
-                                        selectedLocale.getLocaleId()));
+                        statisticMap.get(new VersionLocaleKey(item2.getId(),
+                                selectedLocale.getLocaleId()));
 
                 if (selectedSortOption.equals(SortingType.PERCENTAGE)) {
                     return Double.compare(
@@ -247,8 +244,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     public List<HLocale> getActiveLocales() {
         if (activeLocales == null) {
             Set<HLocale> groupActiveLocales =
-                    localeServiceImpl.getGroupActiveLocales(getInstance()
-                            .getSlug());
+                    localeServiceImpl.getGroupActiveLocales(getSlug());
             activeLocales = Lists.newArrayList(groupActiveLocales);
         }
         Collections.sort(activeLocales, languageComparator);
@@ -282,7 +278,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
     @CachedMethodResult
     public WordStatistic getStatisticForLocale(LocaleId localeId) {
         WordStatistic statistic = new WordStatistic();
-        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
+        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : statisticMap
                 .entrySet()) {
             if (entry.getKey().getLocaleId().equals(localeId)) {
                 statistic.add(entry.getValue());
@@ -293,67 +289,46 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         return statistic;
     }
 
-    private int getTotalWordsCountForGroup() {
-        int total = 0;
-        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
-                .entrySet()) {
-            total += entry.getValue().getTotal();
-        }
-        return total;
-    }
-
-    @CachedMethodResult
-    public OverallStatistics getOverallStatistic() {
-        if (overallStatistics == null) {
-
-            WordStatistic wordStatistic = new WordStatistic();
-            for (Map.Entry<VersionLocaleKey, WordStatistic> entry : getStatisticMap()
-                    .entrySet()) {
-                wordStatistic.add(entry.getValue());
-            }
-            wordStatistic.setRemainingHours(StatisticsUtil
-                    .getRemainingHours(wordStatistic));
-
-            int totalWordCount = getTotalWordsCountForGroup();
-            int totalMessageCount =
-                    groupStatisticServiceImpl.getTotalMessageCount(getSlug());
-
-            overallStatistics =
-                    new OverallStatistics(totalWordCount, totalMessageCount,
-                            wordStatistic);
-
-        }
-        return overallStatistics;
-    }
-
     @CachedMethodResult
     public WordStatistic getSelectedLocaleStatistic(Long versionId) {
-        return getStatisticMap().get(
-                new VersionLocaleKey(versionId, selectedLocale.getLocaleId()));
+        return statisticMap.get(new VersionLocaleKey(versionId, selectedLocale
+                .getLocaleId()));
     }
 
     /**
      * Load up statistics for all project versions in all active locales in the
-     * group
-     * 
-     * @return
+     * group.
      */
-    private Map<VersionLocaleKey, WordStatistic> getStatisticMap() {
-        if (statisticMap == null) {
-            statisticMap = Maps.newHashMap();
+    private void loadStatistic() {
+        statisticMap = Maps.newHashMap();
 
-            for (HLocale locale : getActiveLocales()) {
-                statisticMap.putAll(groupStatisticServiceImpl
-                        .getLocaleStatistic(getSlug(), locale.getLocaleId()));
-            }
+        for (HLocale locale : getActiveLocales()) {
+            statisticMap.putAll(groupStatisticServiceImpl.getLocaleStatistic(
+                    getSlug(), locale.getLocaleId()));
         }
-        return statisticMap;
+
+        WordStatistic overallWordStatistic = new WordStatistic();
+        int totalWordCount = 0;
+        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : statisticMap
+                .entrySet()) {
+            overallWordStatistic.add(entry.getValue());
+            totalWordCount += entry.getValue().getTotal();
+        }
+        overallWordStatistic.setRemainingHours(StatisticsUtil
+                .getRemainingHours(overallWordStatistic));
+
+        int totalMessageCount =
+                groupStatisticServiceImpl.getTotalMessageCount(getSlug());
+
+        overallStatistic =
+                new OverallStatistic(totalWordCount, totalMessageCount,
+                        overallWordStatistic);
     }
 
     @AllArgsConstructor
     @Getter
     @Setter
-    public final class OverallStatistics {
+    public final class OverallStatistic {
         private int totalWordCount;
         private int totalMessageCount;
         private WordStatistic statistic;

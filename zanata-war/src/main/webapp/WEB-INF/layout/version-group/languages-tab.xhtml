@@ -3,7 +3,8 @@
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
-  xmlns:a4j="http://richfaces.org/a4j">
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:f="http://java.sun.com/jsf/core">
 
   <script type="text/javascript">
     function update_activeRow(clickedElement) {
@@ -30,6 +31,7 @@
               </div>
               <div
                 class="g__item w--1-2 w--1-2-s txt--align-right txt--s-align-right">
+
                 <zanata:sortlist id="language_sorting"
                   sortAction="#{versionGroupHomeAction.sortLanguageList()}"
                   render="language_list"
@@ -59,7 +61,7 @@
                     class="progress-bar__expander panels__panel__item bg--highest--hover">
                     <a4j:commandLink
                       action="#{versionGroupHomeAction.setSelectedLocale(locale)}"
-                      render="project_list,selected_locale"
+                      render="projects_column"
                       onclick="update_activeRow(this), toggleColumn()">
                       <div class="list__item">
                         <div class="list__item__info">
@@ -71,24 +73,20 @@
                           rendered="#{versionGroupHomeAction.pageRendered}">
                          <span class="stats--small txt--state-neutral">
                             <span class="stats__figure">
-                              ${versionGroupHomeAction.getStatisticFigure(versionGroupHomeAction.languageSortingList.selectedSortOption, selectedlocale.localeId)}
+                              ${versionGroupHomeAction.getStatisticFigure(versionGroupHomeAction.languageSortingList.selectedSortOption, locale.localeId)}
                             </span>
                             <span class="stats__unit txt--lowercase">
                               ${versionGroupHomeAction.getStatisticUnit(versionGroupHomeAction.languageSortingList.selectedSortOption)}
                             </span>
                           </span>
                         </s:div>
-                        <h:graphicImage value="/images/loading.gif"
-                          alt="Loading"
-                          rendered="#{!versionGroupHomeAction.pageRendered}"/>
                       </div>
-                      <s:fragment
-                        rendered="#{versionGroupHomeAction.pageRendered}">
-                        <zanata:statistic
-                          value="${versionGroupHomeAction.getStatisticForLocale(locale.localeId)}"/>
-                      </s:fragment>
-                      <h:graphicImage value="/images/loading.gif"
-                        alt="Loading"
+
+                      <zanata:statistic
+                        value="${versionGroupHomeAction.getStatisticForLocale(locale.localeId)}"
+                        rendered="#{versionGroupHomeAction.pageRendered}"/>
+
+                      <zanata:loader type="large"
                         rendered="#{!versionGroupHomeAction.pageRendered}"/>
                     </a4j:commandLink>
                   </li>
@@ -98,74 +96,92 @@
           </h:form>
         </div>
       </div>
+
       <div class="g__item w--1-2 w--1-2-s panels__panel is-active">
-        <div class="bg--pop-higher">
-          <div class="panels__panel__header">
-            <div class="g--tight">
-              <div class="g__item w--1-2 w--1-2-s">
-                <h2 class="heading--secondary epsilon">
+        <s:div styleClass="bg--pop-higher" id="projects_column">
+          <s:fragment
+            rendered="#{versionGroupHomeAction.selectedLocale != null}">
+            <div class="panels__panel__header">
+              <div class="g--tight">
+                <div class="g__item w--1-2 w--1-2-s">
+                  <h2 class="heading--secondary epsilon">
                   <span class="is-hidden--l-up">
-                    <a href="#"
-                      onclick="toggleColumn()">
+                    <a href="#" onclick="toggleColumn()">
                       #{messages['jsf.Languages']}
                     </a>
                     <i class="i i--arrow-right"></i>
                   </span>
-                  <i class="i i--project l--push-right-quarter"></i>
-                  <a4j:outputPanel id="selected_locale">
-                    <s:fragment
-                      rendered="#{versionGroupHomeAction.selectedLocale != null}">
-                      #{versionGroupHomeAction.selectedLocale.retrieveDisplayName()}
-                    </s:fragment>
-                  </a4j:outputPanel>
-                  #{messages['Projects']}
-                </h2>
-              </div>
-              <div
-                class="g__item w--1-2 w--1-2-s txt--align-right txt--s-align-right">
-                <zanata:sortlist id="project_sorting"
-                  sortAction="#{versionGroupHomeAction.sortProjectList()}"
-                  render="project_list"
-                  sortingList="#{versionGroupHomeAction.projectSortingList}"/>
+                    <i class="i i--project l--push-right-quarter"></i>
+                    #{versionGroupHomeAction.selectedLocale.retrieveDisplayName()}
+                    #{messages['Projects']}
+                  </h2>
+                </div>
+                <div
+                  class="g__item w--1-2 w--1-2-s txt--align-right txt--s-align-right">
+                  <zanata:sortlist id="project_sorting"
+                    sortAction="#{versionGroupHomeAction.sortProjectList()}"
+                    render="project_list"
+                    sortingList="#{versionGroupHomeAction.projectSortingList}"/>
+                </div>
               </div>
             </div>
-          </div>
-          <h:form id="project_list">
-            <s:fragment
-              rendered="#{versionGroupHomeAction.selectedLocale != null}">
-              <ul class="list--stats">
-                <ui:repeat
-                  value="#{versionGroupHomeAction.getProjectIterations()}"
-                  var="version">
-                  <li
-                    class="progress-bar__expander panels__panel__item bg--highest--hover">
-                    <a href="#">
-                      <div class="list__item">
-                        <div class="list__item__info">
+            <h:form id="project_list">
+              <s:fragment
+                rendered="#{versionGroupHomeAction.selectedLocale != null and !versionGroupHomeAction.getProjectIterations().isEmpty()}">
+                <ul class="list--stats">
+                  <ui:repeat
+                    value="#{versionGroupHomeAction.getProjectIterations()}"
+                    var="version">
+                    <li
+                      class="progress-bar__expander panels__panel__item bg--highest--hover">
+                      <a href="#">
+                        <div class="list__item">
+                          <div class="list__item__info">
                           <span class="list__title">#{version.project.name}
                             <i class="i i--version"></i> #{version.slug}
                           </span>
-                        </div>
-                        <div class="list__item__stats">
+                          </div>
+                          <div class="list__item__stats">
                           <span class="stats--small">
                             <span class="stats__figure">
-                              ${versionGroupHomeAction.getStatisticFigure(versionGroupHomeAction.projectSortingList.selectedSortOption, selectedlocale.localeId)}
+                              ${versionGroupHomeAction.getStatisticFigure(versionGroupHomeAction.projectSortingList.selectedSortOption, versionGroupHomeAction.selectedLocale.localeId)}
                             </span>
                             <span class="stats__unit txt--lowercase">
                               ${versionGroupHomeAction.getStatisticUnit(versionGroupHomeAction.projectSortingList.selectedSortOption)}
                             </span>
                           </span>
+                          </div>
                         </div>
-                      </div>
-                      <zanata:statistic
-                        value="${versionGroupHomeAction.getSelectedLocaleStatistic(version.id)}"/>
+                        <zanata:statistic
+                          value="${versionGroupHomeAction.getSelectedLocaleStatistic(version.id)}"/>
+                      </a>
+                    </li>
+                  </ui:repeat>
+                </ul>
+              </s:fragment>
+              <s:fragment
+                rendered="#{versionGroupHomeAction.selectedLocale == null}">
+                <div class="l--pad-all-half">
+                  <p class="txt--meta">
+                    #{messages['jsf.SelectALanguageFromList']}
+                  </p>
+                </div>
+              </s:fragment>
+              <s:fragment
+                rendered="#{versionGroupHomeAction.getProjectIterations().isEmpty()}">
+                <div class="l--pad-all-half">
+                  <p class="txt--meta">#{messages['jsf.NoProjectsInGroup']}</p>
+
+                  <p>
+                    <a href="#" class="button--primary">
+                      #{messages['jsf.AddProjectVersions']}
                     </a>
-                  </li>
-                </ui:repeat>
-              </ul>
-            </s:fragment>
-          </h:form>
-        </div>
+                  </p>
+                </div>
+              </s:fragment>
+            </h:form>
+          </s:fragment>
+        </s:div>
       </div>
     </div>
   </div>

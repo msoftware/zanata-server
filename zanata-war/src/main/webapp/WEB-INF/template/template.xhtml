@@ -44,6 +44,8 @@
       href="#{request.contextPath}/resources/fontello/css/fontello.css"/>
     <link type="text/css" rel="stylesheet"
       href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,400italic"/>
+    <script type="text/javascript"
+      src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <ui:insert name="head"/>
   </h:head>
 
@@ -73,6 +75,30 @@
 
         <footer role="contentinfo" class="l--push--v-2">
           <div class="l__wrapper">
+            <div class="l--pad-v-1 d--top">
+              <div class="g">
+                <div class="g__item w--1-2 l--push-bottom-quarter">
+                  <ul class="list--horizontal txt--meta">
+                    <li><a href="http://zanata.org/terms"
+                      target="_blank">Terms</a></li>
+                    <li><a href="http://zanata.org/about"
+                      target="_blank">#{messages['jsf.About']}</a></li>
+                    <li><a href="http://zanata.org/blog"
+                      target="_blank">#{messages['jsf.Blog']}</a></li>
+                    <li><a href="http://zanata.org/help"
+                      target="_blank">#{messages['jsf.Help']}</a></li>
+                    <li><a
+                      href="https://bugzilla.redhat.com/enter_bug.cgi?format=guided&amp;product=Zanata"
+                      target="_blank">#{messages['jsf.ReportAProblem']}</a></li>
+                  </ul>
+                </div>
+                <div class="g__item w--1-2 txt--align-right">
+                  <p class="txt--meta"><h:outputText
+                    value="#{messages['jsf.CopyrightNotice']}" escape="false"/>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </footer>
       </div>
@@ -80,8 +106,6 @@
 
     <ui:include src="piwik.xhtml"/>
 
-    <script
-      src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script
       src="#{applicationConfiguration.webAssetsUrl}/assets/js/script.js"></script>
   </h:body>

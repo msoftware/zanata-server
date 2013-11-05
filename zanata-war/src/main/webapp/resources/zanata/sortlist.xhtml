@@ -4,9 +4,9 @@
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:composite="http://java.sun.com/jsf/composite"
   xmlns:ui="http://java.sun.com/jsf/facelets"
-  xmlns:s="http://jboss.org/schema/seam/taglib"
   xmlns:a4j="http://richfaces.org/a4j"
-  xmlns:f="http://java.sun.com/jsf/core">
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:rich="http://richfaces.org/rich">
 
 <composite:interface>
   <composite:attribute name="sortingList" type="org.zanata.action.SortingType"
@@ -37,7 +37,7 @@
             <a4j:commandLink
               action="#{cc.attrs.sortAction}"
               styleClass="#{cc.attrs.sortingList.selectedSortOption eq sortOption ? 'is-active' : ''}"
-              render="#{cc.attrs.id}-selected_sort,#{cc.attrs.id}-sort_options,#{cc.attrs.render}">
+              render="#{rich:clientId(cc.attrs.id.concat('-selected_sort'))},#{rich:clientId(cc.attrs.id.concat('-sort_options'))},#{cc.attrs.render}">
               #{sortOption}
               <f:setPropertyActionListener
                 target="#{cc.attrs.sortingList.selectedSortOption}"
