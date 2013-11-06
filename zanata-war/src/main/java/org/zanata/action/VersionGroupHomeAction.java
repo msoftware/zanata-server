@@ -20,6 +20,7 @@
  */
 package org.zanata.action;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,9 +32,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.hibernate.Session;
-import org.hibernate.criterion.NaturalIdentifier;
-import org.hibernate.criterion.Restrictions;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
@@ -42,6 +40,7 @@ import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.annotation.CachedMethodResult;
 import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordStatistic;
+import org.zanata.dao.VersionGroupDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
@@ -61,7 +60,7 @@ import com.google.common.collect.Maps;
 
 @Name("versionGroupHomeAction")
 @Scope(ScopeType.PAGE)
-public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
+public class VersionGroupHomeAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @In
@@ -75,6 +74,9 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
     private HAccount authenticatedAccount;
+
+    @In
+    private VersionGroupDAO versionGroupDAO;
 
     @Getter
     @Setter
@@ -334,41 +336,14 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
         private WordStatistic statistic;
     }
 
-    @Override
-    protected HIterationGroup loadInstance() {
-        Session session = (Session) getEntityManager().getDelegate();
-        return (HIterationGroup) session.byNaturalId(HIterationGroup.class)
-                .using("slug", getSlug()).load();
-    }
-
     public List<HProjectIteration> getProjectIterations() {
         if (projectIterations == null) {
+            HIterationGroup group = versionGroupDAO.getBySlug(slug);
             projectIterations =
-                    new ArrayList<HProjectIteration>(getInstance()
-                            .getProjectIterations());
+                    new ArrayList<HProjectIteration>(
+                            group.getProjectIterations());
         }
         Collections.sort(projectIterations, versionComparator);
         return projectIterations;
-    }
-
-    @Override
-    public NaturalIdentifier getNaturalId() {
-        return Restrictions.naturalId().set("slug", slug);
-    }
-
-    @Override
-    public boolean isIdDefined() {
-        return slug != null;
-    }
-
-    @Override
-    public Object getId() {
-        return slug;
-    }
-
-    public void validateSuppliedId() {
-        getInstance(); // this will raise an EntityNotFound exception
-        // when id is invalid and conversation will not
-        // start
     }
 }

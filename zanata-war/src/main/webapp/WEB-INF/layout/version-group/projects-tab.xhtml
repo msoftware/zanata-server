@@ -3,14 +3,15 @@
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
-  xmlns:a4j="http://richfaces.org/a4j">
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:f="http://java.sun.com/jsf/core">
 
   <s:link styleClass="action_link" view="/version-group/request_to_join.xhtml"
     value="#{messages['jsf.RequestToJoinVersionGroup']}" propagation="none"
     rendered="#{versionGroupHomeAction.isUserProjectMaintainer()}">
     <f:param name="emailType" value="request_to_join_group"/>
     <f:param name="versionGroupSlug"
-      value="#{versionGroupHomeAction.instance.slug}"/>
+      value="#{versionGroupHomeAction.slug}"/>
   </s:link>
 
 </ui:composition>

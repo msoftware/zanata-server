@@ -21,10 +21,13 @@
 package org.zanata.action;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
@@ -39,14 +42,19 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
+import org.zanata.common.LocaleId;
+import org.zanata.dao.LocaleDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
+import org.zanata.rest.service.ResourceUtils;
 import org.zanata.service.LocaleService;
 import org.zanata.service.SlugEntityService;
+import org.zanata.util.ZanataMessages;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -72,9 +80,24 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     @In
     private LocaleService localeServiceImpl;
 
+    @In
+    private ZanataMessages zanataMessages;
+
+    @In
+    private ResourceUtils resourceUtils;
+
+    @In
+    private LocaleDAO localeDAO;
+
+    private List<HLocale> supportedLocales;
+
     private List<SelectItem> statusList;
 
-    private List<LocaleItem> activeLocales;
+    private List<HLocale> activeLocales;
+
+    @Getter
+    @Setter
+    private String newLanguage;
 
     public void verifySlugAvailable(ValueChangeEvent e) {
         String slug = (String) e.getNewValue();
@@ -103,14 +126,11 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         if (authenticatedAccount != null) {
             getInstance().addMaintainer(authenticatedAccount.getPerson());
         }
-
-        updateActiveLocales();
         return super.persist();
     }
 
     @Override
     public String update() {
-        updateActiveLocales();
         return super.update();
     }
 
@@ -123,38 +143,61 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return getAvailableStatus();
     }
 
-    public List<LocaleItem> getLocales() {
-        if (activeLocales == null) {
-            activeLocales = Lists.newArrayList();
-
-            List<HLocale> supportedLocales =
-                    localeServiceImpl.getSupportedLocales();
-            Set<HLocale> groupActiveLocales =
-                    localeServiceImpl.getGroupActiveLocales(getInstance()
-                            .getSlug());
-
-            for (HLocale locale : supportedLocales) {
-                if (groupActiveLocales.contains(locale)) {
-                    activeLocales.add(new LocaleItem(true, locale));
-                } else {
-                    activeLocales.add(new LocaleItem(false, locale));
-                }
-            }
+    public List<HLocale> suggestLocales(final String query) {
+        if (supportedLocales == null) {
+            supportedLocales = localeServiceImpl.getSupportedLocales();
         }
-        Collections.sort(activeLocales, LocaleItem.Comparator);
-        return activeLocales;
+
+        Collection<HLocale> filtered =
+                Collections2.filter(supportedLocales, new Predicate<HLocale>() {
+                    @Override
+                    public boolean apply(@Nullable HLocale input) {
+                        return input.getLocaleId().getId().startsWith(query);
+                    }
+                });
+
+        return Lists.newArrayList(filtered);
     }
 
-    private void updateActiveLocales() {
-        if (activeLocales != null) {
-            getInstance().getActiveLocales().clear();
-            for (LocaleItem localeItem : activeLocales) {
-                if (localeItem.isSelected()) {
-                    getInstance().getActiveLocales()
-                            .add(localeItem.getLocale());
-                }
-            }
+    public void addLanguage() {
+        if (!isLanguageNameValid()) {
+            return; // not success
         }
+        HLocale locale =
+                localeServiceImpl.getByLocaleId(new LocaleId(newLanguage));
+        getInstance().getActiveLocales().add(locale);
+        super.update();
+        activeLocales = null;
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.LanguageAddedToGroup",
+                        locale.retrieveDisplayName()));
+    }
+
+    public void removeLanguage(HLocale locale) {
+        getInstance().getActiveLocales().remove(locale);
+        super.update();
+        activeLocales = null;
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.LanguageRemoveFromGroup",
+                        locale.retrieveDisplayName()));
+
+    }
+
+    public List<HLocale> getActiveLocales() {
+        if (activeLocales == null) {
+            Set<HLocale> groupActiveLocales =
+                    localeServiceImpl.getGroupActiveLocales(getSlug());
+            activeLocales = Lists.newArrayList(groupActiveLocales);
+        }
+
+        Collections.sort(activeLocales, new Comparator<HLocale>() {
+            @Override
+            public int compare(HLocale hLocale, HLocale hLocale2) {
+                return hLocale.retrieveDisplayName().compareTo(
+                        hLocale2.retrieveDisplayName());
+            }
+        });
+        return activeLocales;
     }
 
     private List<SelectItem> getAvailableStatus() {
@@ -203,5 +246,42 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         getInstance(); // this will raise an EntityNotFound exception
         // when id is invalid and conversation will not
         // start
+    }
+
+    public boolean isLanguageNameValid() {
+        // Check that locale Id is syntactically valid
+        LocaleId localeId;
+        try {
+            localeId = new LocaleId(newLanguage);
+        } catch (IllegalArgumentException iaex) {
+            FacesMessages.instance().add(
+                    zanataMessages
+                            .getMessage("jsf.language.validation.Invalid"));
+            return false;
+        }
+
+        if (!localeServiceImpl.localeSupported(localeId)) {
+            FacesMessages
+                    .instance()
+                    .add(zanataMessages
+                            .getMessage("jsf.language.validation.NotSupport"),
+                            localeId);
+            return false;
+        }
+
+        // check for already added language
+        for (HLocale locale : getActiveLocales()) {
+            if (locale.getLocaleId().equals(localeId)) {
+                FacesMessages
+                        .instance()
+                        .add(zanataMessages
+                                .getMessage("jsf.LanguageAlreadyInGroup"),
+                                localeId);
+
+                return false;
+            }
+        }
+
+        return true;
     }
 }

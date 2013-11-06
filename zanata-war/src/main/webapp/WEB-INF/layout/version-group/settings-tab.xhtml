@@ -1,82 +1,107 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:s="http://jboss.org/schema/seam/taglib"
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
-  xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
-  xmlns:a4j="http://richfaces.org/a4j">
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:rich="http://richfaces.org/rich">
   <h1>#{messages['Settings']}</h1>
 
   <div class="tabs--vertical js-tabs">
     <ul class="tabs__nav js-tabs-nav">
       <li class="is-active">
-        <a href="#general">
+        <a href="#settings-general">
           <i class="i i--settings"></i>
           <span class="is-hidden--m-down">#{messages['jsf.General']}</span>
         </a></li>
       <li class="">
-        <a href="#languages">
+        <a href="#settings-languages">
           <i class="i i--language"></i>
           <span class="is-hidden--m-down">#{messages['jsf.Languages']}</span>
         </a>
       </li>
       <li class="">
-        <a href="#projects">
+        <a href="#settings-projects">
           <i class="i i--project"></i>
           <span class="is-hidden--m-down">#{messages['jsf.Projects']}</span>
         </a>
       </li>
       <li class="">
-        <a href="#maintainers">
+        <a href="#settings-maintainers">
           <i class="i i--users"></i>
           <span class="is-hidden--m-down">#{messages['jsf.Maintainers']}</span>
         </a>
       </li>
     </ul>
     <ul class="tabs__content js-tabs-content">
-      <li class="is-active" id="general">
+      <li class="is-active" id="settings-general">
         <h2 class="l--push-all-0 gamma d--bottom">
           #{messages['jsf.General']}
         </h2>
-        <ui:include
-          src="../version_group_edit_form.xhtml"/>
-      </li>
-      <li id="languages" class="">
-        <h2
-          class="l--push-all-0 gamma d--bottom l--push-bottom-half">Languages</h2>
+        <h:form id="group-general-settings-form">
+          <div class="l--constrain-medium">
+            <ui:include src="edit_form.xhtml"/>
 
-        <h3 class="delta">Active Languages</h3>
-        <ul class="list--slat l--push-top-half">
-          <li class="reveal">Assamese <span class="txt--meta">[as]</span> <a
-            href="#" class="l--float-right txt--danger reveal__target"><i
-            class="i--large i--remove"></i></a></li>
-          <li class="reveal">Chinese (Simplified Han) <span
-            class="txt--meta">[zh-Hans]</span> <a href="#"
-            class="l--float-right txt--danger reveal__target"><i
-            class="i--large i--remove"></i></a></li>
-          <li class="reveal">Chinese (Traditional Han) <span
-            class="txt--meta">[zh-Hant]</span> <a href="#"
-            class="l--float-right txt--danger reveal__target"><i
-            class="i--large i--remove"></i></a></li>
-          <li class="reveal">English (United States) <span
-            class="txt--meta">[en-US]</span> <a href="#"
-            class="l--float-right txt--danger reveal__target"><i
-            class="i--large i--remove"></i></a></li>
-
-          <li>
-            <div class="g--tight">
-              <div class="g__item w--7-10"><input type="text"
-                placeholder="Add a Language"/></div>
-              <div class="g__item w--3-10">
-                <button class="button--full">Add</button>
-              </div>
+            <div class="l--push-top-1">
+              <h:commandButton id="save"
+                value="#{messages['jsf.UpdateGeneralSettings']}"
+                action="#{versionGroupHome.update}"
+                rendered="#{versionGroupHome.managed}"
+                styleClass="l--push-right-half button--primary"/>
+              <a4j:commandButton render="group-general-settings-form"
+                value="#{messages['Cancel']}"/>
             </div>
-          </li>
-        </ul>
+          </div>
+        </h:form>
       </li>
-      <li id="projects"
+      <li id="settings-languages">
+        <h2 class="l--push-all-0 gamma d--bottom l--push-bottom-half">
+          #{messages['jsf.Languages']}
+        </h2>
+
+        <h3 class="delta">#{messages['jsf.ActiveLanguages']}</h3>
+        <h:form id="settings-language-form">
+          <ul class="list--slat l--push-top-half">
+            <ui:repeat value="#{versionGroupHome.activeLocales}" var="locale">
+              <li class="reveal">#{locale.retrieveDisplayName()}
+                <span class="txt--meta">[#{locale.localeId}]</span>
+                <a4j:commandLink
+                  action="#{versionGroupHome.removeLanguage(locale)}"
+                  styleClass="l--float-right txt--danger reveal__target"
+                  render="settings-language-form">
+                  <i class="i--large i--remove"></i>
+                </a4j:commandLink>
+              </li>
+            </ui:repeat>
+            <li>
+              <div class="g--tight">
+                <div class="g__item w--7-10">
+                  <rich:autocomplete mode="client" var="result" styleClass="text-input"
+                    autocompleteMethod="#{versionGroupHome.suggestLocales}"
+                    fetchValue="#{result.localeId}" layout="table"
+                    value="#{versionGroupHome.newLanguage}">
+                    <a4j:ajax event="change"
+                      listener="#{versionGroupHome.isLanguageNameValid()}"/>
+                    <h:column>
+                      <h:outputText value="#{result.localeId}"/>
+                    </h:column>
+                    <h:column>
+                      <h:outputText value="#{result.retrieveDisplayName()}"/>
+                    </h:column>
+                  </rich:autocomplete>
+                </div>
+                <div class="g__item w--3-10">
+                  <a4j:commandButton styleClass="button--full"
+                    action="#{versionGroupHome.addLanguage()}"
+                    value="#{messages['Add']}" render="settings-language-form"/>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </h:form>
+      </li>
+      <li id="settings-projects"
         class="">Tab content here, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis luctus nisi et eros bibendum lacinia. Curabitur sed est nec urna pretium vulputate ut eget lectus. In ultricies, tellus non vehicula malesuada, augue sem aliquet tellus, ut faucibus turpis ante quis nibh. Ut vel turpis tortor, a consectetur ipsum. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. more tab content and maybe some more.
       </li>
-      <li id="maintainers"
+      <li id="settings-maintainers"
         class="">Tab content here, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis luctus nisi et eros bibendum lacinia. Curabitur sed est nec urna pretium vulputate ut eget lectus. In ultricies, tellus non vehicula malesuada, augue sem aliquet tellus, ut faucibus turpis ante quis nibh. Ut vel turpis tortor, a consectetur ipsum. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. more tab content and maybe some more.
       </li>
     </ul>

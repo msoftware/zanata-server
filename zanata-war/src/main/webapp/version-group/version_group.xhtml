@@ -11,7 +11,7 @@
   template="../WEB-INF/template/template.xhtml">
 
   <ui:define name="page_title">
-    #{messages['jsf.Groups']}:#{versionGroupHomeAction.instance.name}
+    #{messages['jsf.Groups']}:#{versionGroupHome.instance.name}
   </ui:define>
 
 
@@ -50,11 +50,11 @@
         <div class="media l--push-bottom-half">
           <div class="media__body">
             <h1 class="l--push-all-0">
-              #{versionGroupHomeAction.instance.name}
+              #{versionGroupHome.instance.name}
             </h1>
 
             <p class="txt--understated">
-              #{versionGroupHomeAction.instance.description}
+              #{versionGroupHome.instance.description}
             </p>
           </div>
         </div>
@@ -127,7 +127,7 @@
                     #{messages['jsf.Projects']}
                   </span>
                   <span class="txt--neutral">
-                    #{versionGroupHomeAction.projectIterations.size}
+                    #{versionGroupHomeAction.getProjectIterations().size}
                   </span>
                 </a4j:commandLink>
               </li>
@@ -141,12 +141,12 @@
                     #{messages['jsf.Maintainers']}
                   </span>
                   <span class="txt--neutral">
-                    #{versionGroupHomeAction.instance.maintainers.size}
+                    #{versionGroupHome.instance.maintainers.size}
                   </span>
                 </a4j:commandLink>
               </li>
               <s:fragment
-                rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}">
+                rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                 <li>
                   <a4j:commandLink
                     onclick="updateView(this.id);setActiveTab(this.id)"
@@ -184,7 +184,7 @@
 
             <s:div id="settings_tab_content"
               styleClass="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'is-hidden'}"
-              rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}">
+              rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
               <ui:include
                 src="../WEB-INF/layout/version-group/settings-tab.xhtml"/>
             </s:div>
