@@ -25,8 +25,8 @@
         jQuery("[id$=_tab]").removeClass('is-active');
         jQuery('#' + tabId).addClass('is-active');
 
-        jQuery("[id$=_tab_content]").css('display', 'none');
-        jQuery('#' + tabId + '_content').css('display', 'block');
+        jQuery("[id$=_tab_content]").addClass('is-hidden');
+        jQuery('#' + tabId + '_content').removeClass('is-hidden');
       }
     </script>
 
@@ -164,26 +164,26 @@
 
           <div class="tabs__content panels__container l--push-top-1">
             <s:div id="languages_tab_content"
-              style="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'display:none'}">
+              styleClass="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'is-hidden'}">
               <ui:include
                 src="../WEB-INF/layout/version-group/languages-tab.xhtml">
               </ui:include>
             </s:div>
 
             <s:div id="projects_tab_content"
-              style="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'display:none'}">
+              styleClass="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'is-hidden'}">
               <ui:include
                 src="../WEB-INF/layout/version-group/projects-tab.xhtml"/>
             </s:div>
 
             <s:div id="maintainers_tab_content"
-              style="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'display:none'}">
+              styleClass="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'is-hidden'}">
               <ui:include
                 src="../WEB-INF/layout/version-group/maintainers-tab.xhtml"/>
             </s:div>
 
             <s:div id="settings_tab_content"
-              style="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'display:none'}"
+              styleClass="#{versionGroupHomeAction.view.concat('_content') eq component.id ? '' : 'is-hidden'}"
               rendered="#{s:hasPermission(versionGroupHomeAction.instance, 'update')}">
               <ui:include
                 src="../WEB-INF/layout/version-group/settings-tab.xhtml"/>
