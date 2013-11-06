@@ -89,7 +89,7 @@ public class VersionGroupHomeAction extends SlugHome<HIterationGroup> {
 
     @Getter
     @Setter
-    private String view = "tab-languages";
+    private String view = "languages_tab";
 
     @Getter
     private OverallStatistic overallStatistic;
