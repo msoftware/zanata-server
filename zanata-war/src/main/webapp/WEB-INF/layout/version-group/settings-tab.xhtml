@@ -2,7 +2,8 @@
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:a4j="http://richfaces.org/a4j"
-  xmlns:rich="http://richfaces.org/rich">
+  xmlns:rich="http://richfaces.org/rich"
+  xmlns:s="http://jboss.org/schema/seam/taglib">
   <h1>#{messages['Settings']}</h1>
 
   <div class="tabs--vertical js-tabs">
@@ -11,7 +12,8 @@
         <a href="#settings-general">
           <i class="i i--settings"></i>
           <span class="is-hidden--m-down">#{messages['jsf.General']}</span>
-        </a></li>
+        </a>
+      </li>
       <li class="">
         <a href="#settings-languages">
           <i class="i i--language"></i>
@@ -36,17 +38,17 @@
         <h2 class="l--push-all-0 gamma d--bottom">
           #{messages['jsf.General']}
         </h2>
-        <h:form id="group-general-settings-form">
+        <h:form id="general-settings-form">
           <div class="l--constrain-medium">
             <ui:include src="edit_form.xhtml"/>
 
             <div class="l--push-top-1">
-              <h:commandButton id="save"
-                value="#{messages['jsf.UpdateGeneralSettings']}"
+              <h:commandButton value="#{messages['jsf.UpdateGeneralSettings']}"
                 action="#{versionGroupHome.update}"
                 rendered="#{versionGroupHome.managed}"
                 styleClass="l--push-right-half button--primary"/>
-              <a4j:commandButton render="group-general-settings-form"
+              <s:button styleClass="button"
+                view="/version-group/version_group.xhtml"
                 value="#{messages['Cancel']}"/>
             </div>
           </div>
@@ -74,19 +76,24 @@
             <li>
               <div class="g--tight">
                 <div class="g__item w--7-10">
-                  <rich:autocomplete mode="client" var="result" styleClass="text-input"
-                    autocompleteMethod="#{versionGroupHome.suggestLocales}"
-                    fetchValue="#{result.localeId}" layout="table"
-                    value="#{versionGroupHome.newLanguage}">
-                    <a4j:ajax event="change"
-                      listener="#{versionGroupHome.isLanguageNameValid()}"/>
-                    <h:column>
-                      <h:outputText value="#{result.localeId}"/>
-                    </h:column>
-                    <h:column>
-                      <h:outputText value="#{result.retrieveDisplayName()}"/>
-                    </h:column>
-                  </rich:autocomplete>
+                  <s:decorate template="../field.xhtml" enclose="true"
+                    id="newLanguageField">
+                    <rich:autocomplete mode="client" var="result"
+                      styleClass="auto-complete" id="newLanguage"
+                      autocompleteMethod="#{versionGroupHome.suggestLocales}"
+                      fetchValue="#{result.localeId}" layout="table"
+                      value="#{versionGroupHome.newLanguage}">
+                      <a4j:ajax event="change"
+                        listener="#{versionGroupHome.validateLanguageName(component.id)}"
+                        execute="@this" render="newLanguageField"/>
+                      <h:column>
+                        <h:outputText value="#{result.localeId}"/>
+                      </h:column>
+                      <h:column>
+                        <h:outputText value="#{result.retrieveDisplayName()}"/>
+                      </h:column>
+                    </rich:autocomplete>
+                  </s:decorate>
                 </div>
                 <div class="g__item w--3-10">
                   <a4j:commandButton styleClass="button--full"

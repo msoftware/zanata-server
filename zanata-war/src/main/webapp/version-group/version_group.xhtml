@@ -105,7 +105,7 @@
             <ul>
               <li>
                 <a4j:commandLink
-                  onclick="updateView(this.id);setActiveTab(this.id)"
+                  onclick="window.location.hash='languages';updateView(this.id);setActiveTab(this.id)"
                   id="languages_tab"
                   styleClass="#{versionGroupHomeAction.view eq component.id ? 'is-active' : ''}">
                   <i class="i i--language"></i>
@@ -119,9 +119,9 @@
               </li>
               <li>
                 <a4j:commandLink
-                  onclick="updateView(this.id);setActiveTab(this.id)"
+                  onclick="window.location.hash='projects';updateView(this.id);setActiveTab(this.id)"
                   id="projects_tab"
-                  styleClass="#{versionGroupHomeAction.view eq component.id ? 'is-active' : ''}">
+                  class="#{versionGroupHomeAction.view eq component.id ? 'is-active' : ''}">
                   <i class="i i--project"></i>
                   <span class="is-hidden--m-down">
                     #{messages['jsf.Projects']}
@@ -133,7 +133,7 @@
               </li>
               <li>
                 <a4j:commandLink
-                  onclick="updateView(this.id);setActiveTab(this.id)"
+                  onclick="window.location.hash='maintainers';updateView(this.id);setActiveTab(this.id)"
                   id="maintainers_tab"
                   styleClass="#{versionGroupHomeAction.view eq component.id ? 'is-active' : ''}">
                   <i class="i i--users"></i>
@@ -149,7 +149,7 @@
                 rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                 <li>
                   <a4j:commandLink
-                    onclick="updateView(this.id);setActiveTab(this.id)"
+                    onclick="window.location.hash='settings';updateView(this.id);setActiveTab(this.id)"
                     id="settings_tab"
                     styleClass="#{versionGroupHomeAction.view eq component.id ? 'is-active' : ''}">
                     <i class="i i--settings"></i>

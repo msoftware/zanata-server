@@ -34,6 +34,7 @@ import javax.faces.model.SelectItem;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.NaturalIdentifier;
 import org.hibernate.criterion.Restrictions;
@@ -43,12 +44,10 @@ import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
 import org.zanata.common.LocaleId;
-import org.zanata.dao.LocaleDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
-import org.zanata.rest.service.ResourceUtils;
 import org.zanata.service.LocaleService;
 import org.zanata.service.SlugEntityService;
 import org.zanata.util.ZanataMessages;
@@ -82,12 +81,6 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
 
     @In
     private ZanataMessages zanataMessages;
-
-    @In
-    private ResourceUtils resourceUtils;
-
-    @In
-    private LocaleDAO localeDAO;
 
     private List<HLocale> supportedLocales;
 
@@ -134,10 +127,6 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return super.update();
     }
 
-    public String cancel() {
-        return "cancel";
-    }
-
     @Override
     public List<SelectItem> getStatusList() {
         return getAvailableStatus();
@@ -160,7 +149,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     }
 
     public void addLanguage() {
-        if (!isLanguageNameValid()) {
+        if (!validateLanguageName("newLanguage")) {
             return; // not success
         }
         HLocale locale =
@@ -248,24 +237,29 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         // start
     }
 
-    public boolean isLanguageNameValid() {
+    public boolean validateLanguageName(String componentId) {
         // Check that locale Id is syntactically valid
         LocaleId localeId;
+        if (StringUtils.isEmpty(newLanguage)) {
+            return false;
+        }
+
         try {
             localeId = new LocaleId(newLanguage);
         } catch (IllegalArgumentException iaex) {
-            FacesMessages.instance().add(
+            FacesMessages.instance().addToControl(
+                    componentId,
                     zanataMessages
                             .getMessage("jsf.language.validation.Invalid"));
             return false;
         }
 
         if (!localeServiceImpl.localeSupported(localeId)) {
-            FacesMessages
-                    .instance()
-                    .add(zanataMessages
+            FacesMessages.instance().addToControl(
+                    componentId,
+                    zanataMessages
                             .getMessage("jsf.language.validation.NotSupport"),
-                            localeId);
+                    localeId);
             return false;
         }
 
@@ -274,10 +268,11 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
             if (locale.getLocaleId().equals(localeId)) {
                 FacesMessages
                         .instance()
-                        .add(zanataMessages
-                                .getMessage("jsf.LanguageAlreadyInGroup"),
+                        .addToControl(
+                                componentId,
+                                zanataMessages
+                                        .getMessage("jsf.LanguageAlreadyInGroup"),
                                 localeId);
-
                 return false;
             }
         }
