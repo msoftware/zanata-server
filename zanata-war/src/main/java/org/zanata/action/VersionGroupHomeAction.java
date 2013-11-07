@@ -91,7 +91,7 @@ public class VersionGroupHomeAction implements Serializable {
 
     @Getter
     @Setter
-    private String view = "languages_tab";
+    private HProjectIteration selectedVersion;
 
     @Getter
     private OverallStatistic overallStatistic;
@@ -254,9 +254,32 @@ public class VersionGroupHomeAction implements Serializable {
     }
 
     @CachedMethodResult
-    public String getStatisticFigure(String sortOption, LocaleId localeId) {
+    public String getStatisticFigureForLocale(String sortOption,
+            LocaleId localeId) {
         WordStatistic statistic = getStatisticForLocale(localeId);
 
+        return getStatisticFigure(sortOption, statistic);
+    }
+
+    @CachedMethodResult
+    public String getStatisticFigureForProjectWithLocale(String sortOption,
+            LocaleId localeId, Long versionId) {
+        WordStatistic statistic =
+                statisticMap.get(new VersionLocaleKey(versionId, localeId));
+
+        return getStatisticFigure(sortOption, statistic);
+    }
+
+    @CachedMethodResult
+    public String
+            getStatisticFigureForProject(String sortOption, Long versionId) {
+        WordStatistic statistic = getStatisticForProject(versionId);
+
+        return getStatisticFigure(sortOption, statistic);
+    }
+
+    private String
+            getStatisticFigure(String sortOption, WordStatistic statistic) {
         if (sortOption.equals(SortingType.HOURS)) {
             return StatisticsUtil.formatHours(statistic.getRemainingHours());
         } else if (sortOption.equals(SortingType.WORDS)) {
@@ -292,9 +315,29 @@ public class VersionGroupHomeAction implements Serializable {
     }
 
     @CachedMethodResult
+    public WordStatistic getStatisticForProject(Long versionId) {
+        WordStatistic statistic = new WordStatistic();
+        for (Map.Entry<VersionLocaleKey, WordStatistic> entry : statisticMap
+                .entrySet()) {
+            if (entry.getKey().getVersionId().equals(versionId)) {
+                statistic.add(entry.getValue());
+            }
+        }
+        statistic
+                .setRemainingHours(StatisticsUtil.getRemainingHours(statistic));
+        return statistic;
+    }
+
+    @CachedMethodResult
     public WordStatistic getSelectedLocaleStatistic(Long versionId) {
         return statisticMap.get(new VersionLocaleKey(versionId, selectedLocale
                 .getLocaleId()));
+    }
+
+    @CachedMethodResult
+    public WordStatistic getSelectedVersionStatistic(LocaleId localeId) {
+        return statisticMap.get(new VersionLocaleKey(selectedVersion.getId(),
+                localeId));
     }
 
     /**
