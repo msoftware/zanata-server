@@ -1,6 +1,9 @@
 package org.zanata.page.groups;
 
-import java.util.List;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,9 +14,8 @@ import org.zanata.page.projects.ProjectPage;
 import org.zanata.page.projects.ProjectVersionPage;
 import org.zanata.util.TableRow;
 import org.zanata.util.WebElementUtil;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * @author Patrick Huang <a

@@ -82,13 +82,13 @@ public class VersionGroupFullTest {
         CreateVersionGroupPage groupPage =
                 dashboardPage.goToGroups().createNewGroup().saveGroupFailure();
         assertThat("The two errors are value is required",
-            groupPage.getErrors(), Matchers.contains(errorMsg, errorMsg));
+                groupPage.getErrors(), Matchers.contains(errorMsg, errorMsg));
 
         groupPage =
                 groupPage.clearFields().inputGroupName(groupName)
                         .saveGroupFailure();
         assertThat("The value required error shown", groupPage.getErrors(),
-            Matchers.contains(errorMsg));
+                Matchers.contains(errorMsg));
 
         groupPage =
                 groupPage.clearFields().inputGroupId(groupID)
