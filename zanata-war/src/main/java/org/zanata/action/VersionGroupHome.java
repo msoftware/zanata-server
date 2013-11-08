@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.faces.event.ValueChangeEvent;
@@ -40,16 +39,19 @@ import org.hibernate.criterion.NaturalIdentifier;
 import org.hibernate.criterion.Restrictions;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.security.Restrict;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
 import org.zanata.common.LocaleId;
+import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.LocaleService;
 import org.zanata.service.SlugEntityService;
+import org.zanata.service.VersionGroupService;
 import org.zanata.util.ZanataMessages;
 
 import com.google.common.base.Predicate;
@@ -71,7 +73,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     private String slug;
 
     @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
-    HAccount authenticatedAccount;
+    private HAccount authenticatedAccount;
 
     @In
     private SlugEntityService slugEntityServiceImpl;
@@ -80,17 +82,26 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     private LocaleService localeServiceImpl;
 
     @In
+    private VersionGroupService versionGroupServiceImpl;
+
+    @In
     private ZanataMessages zanataMessages;
+
+    @In
+    private ProjectIterationDAO projectIterationDAO;
 
     private List<HLocale> supportedLocales;
 
     private List<SelectItem> statusList;
 
-    private List<HLocale> activeLocales;
-
     @Getter
     @Setter
     private String newLanguage;
+
+    @Getter
+    @Setter
+    // Slug of project [space] version
+    private String newVersion;
 
     public void verifySlugAvailable(ValueChangeEvent e) {
         String slug = (String) e.getNewValue();
@@ -112,6 +123,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     }
 
     @Override
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
     public String persist() {
         if (!validateSlug(getInstance().getSlug(), "slug"))
             return null;
@@ -123,6 +135,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     }
 
     @Override
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
     public String update() {
         return super.update();
     }
@@ -148,6 +161,11 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return Lists.newArrayList(filtered);
     }
 
+    public List<HProjectIteration> suggestVersions(final String query) {
+        return versionGroupServiceImpl.searchLikeSlugOrProjectSlug(query);
+    }
+
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
     public void addLanguage() {
         if (!validateLanguageName("newLanguage")) {
             return; // not success
@@ -156,28 +174,50 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 localeServiceImpl.getByLocaleId(new LocaleId(newLanguage));
         getInstance().getActiveLocales().add(locale);
         super.update();
-        activeLocales = null;
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.LanguageAddedToGroup",
                         locale.retrieveDisplayName()));
     }
 
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    public void addVersion() {
+        if (!validateVersion("newVersion")) {
+            return; // not success
+        }
+        String[] slugs = newVersion.split(" ");
+
+        HProjectIteration version =
+                projectIterationDAO.getBySlug(slugs[0], slugs[1]);
+        getInstance().getProjectIterations().add(version);
+        super.update();
+
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.VersionAddedToGroup",
+                        version.getSlug()));
+    }
+
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
     public void removeLanguage(HLocale locale) {
         getInstance().getActiveLocales().remove(locale);
         super.update();
-        activeLocales = null;
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.LanguageRemoveFromGroup",
                         locale.retrieveDisplayName()));
 
     }
 
-    public List<HLocale> getActiveLocales() {
-        if (activeLocales == null) {
-            Set<HLocale> groupActiveLocales =
-                    localeServiceImpl.getGroupActiveLocales(getSlug());
-            activeLocales = Lists.newArrayList(groupActiveLocales);
-        }
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    public void removeVersion(HProjectIteration version) {
+        getInstance().getProjectIterations().remove(version);
+        super.update();
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.VersionRemoveFromGroup",
+                        version.getSlug()));
+    }
+
+    public List<HLocale> getInstanceActiveLocales() {
+        List<HLocale> activeLocales =
+                Lists.newArrayList(getInstance().getActiveLocales());
 
         Collections.sort(activeLocales, new Comparator<HLocale>() {
             @Override
@@ -254,6 +294,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
             return false;
         }
 
+        // check if locale enabled in server
         if (!localeServiceImpl.localeSupported(localeId)) {
             FacesMessages.instance().addToControl(
                     componentId,
@@ -264,7 +305,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         }
 
         // check for already added language
-        for (HLocale locale : getActiveLocales()) {
+        for (HLocale locale : getInstanceActiveLocales()) {
             if (locale.getLocaleId().equals(localeId)) {
                 FacesMessages
                         .instance()
@@ -275,6 +316,35 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                                 localeId);
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    public boolean validateVersion(String componentId) {
+        newVersion = newVersion.trim();
+        if (StringUtils.isEmpty(newVersion)
+                || !StringUtils.contains(newVersion, " ")) {
+            return false;
+        }
+        String[] slugs = newVersion.split(" ");
+
+        HProjectIteration version =
+                projectIterationDAO.getBySlug(slugs[0], slugs[1]);
+        // check if version exists
+        if (version == null) {
+            FacesMessages.instance().addToControl(componentId,
+                    zanataMessages.getMessage("jsf.InvalidProjectVersion"));
+            return false;
+        }
+
+        // check if version is already in group
+        if (getInstanceProjectIterations().contains(version)) {
+            FacesMessages.instance().addToControl(
+                    componentId,
+                    zanataMessages.getMessage("jsf.VersionAlreadyInGroup",
+                            version.getSlug()));
+            return false;
         }
 
         return true;

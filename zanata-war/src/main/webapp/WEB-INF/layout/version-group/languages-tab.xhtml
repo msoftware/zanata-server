@@ -48,24 +48,24 @@
               <ul class="list--stats">
                 <ui:repeat
                   value="#{versionGroupHomeAction.getActiveLocales()}"
-                  var="locale">
+                  var="hLocale">
                   <li
                     class="progress-bar__expander panels__panel__item bg--highest--hover">
                     <a4j:commandLink
-                      action="#{versionGroupHomeAction.setSelectedLocale(locale)}"
+                      action="#{versionGroupHomeAction.setSelectedLocale(hLocale)}"
                       render="languages-project_list, localeLabel"
                       onclick="updateActiveRow(this), toggleColumn();return">
                       <div class="list__item">
                         <div class="list__item__info">
                           <span class="list__title">
-                            ${locale.retrieveDisplayName()}
+                            ${hLocale.retrieveDisplayName()}
                           </span>
                         </div>
                         <s:div styleClass="list__item__stats"
                           rendered="#{versionGroupHomeAction.pageRendered}">
                          <span class="stats--small txt--state-neutral">
                             <span class="stats__figure">
-                              ${versionGroupHomeAction.getStatisticFigureForLocale(versionGroupHomeAction.languageSortingList.selectedSortOption, locale.localeId)}
+                              ${versionGroupHomeAction.getStatisticFigureForLocale(versionGroupHomeAction.languageSortingList.selectedSortOption, hLocale.localeId)}
                             </span>
                             <span class="stats__unit txt--lowercase">
                               ${versionGroupHomeAction.getStatisticUnit(versionGroupHomeAction.languageSortingList.selectedSortOption)}
@@ -75,7 +75,7 @@
                       </div>
 
                       <zanata:statistic
-                        value="${versionGroupHomeAction.getStatisticForLocale(locale.localeId)}"
+                        value="${versionGroupHomeAction.getStatisticForLocale(hLocale.localeId)}"
                         rendered="#{versionGroupHomeAction.pageRendered}"/>
 
                       <zanata:loader type="large"
@@ -158,7 +158,18 @@
                               <f:param name="slug"
                                 value="#{version.project.slug}"/>
                             </s:link>
-                            <i class="i i--version"></i> #{version.slug}
+                            <h:outputLink
+                              value="#{request.contextPath}/webtrans/Application.seam">
+                              <f:param name="project"
+                                value="#{version.project.slug}"/>
+                              <f:param name="iteration"
+                                value="#{version.slug}"/>
+                              <f:param name="localeId"
+                                value="#{versionGroupHomeAction.selectedLocale.localeId}"/>
+                              <f:param name="locale"
+                                value="#{locale.language}"/>
+                              <i class="i i--version"></i> #{version.slug}
+                            </h:outputLink>
                           </span>
                         </div>
                         <div class="list__item__stats">

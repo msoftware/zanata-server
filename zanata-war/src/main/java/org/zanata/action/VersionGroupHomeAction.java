@@ -21,7 +21,6 @@
 package org.zanata.action;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -42,8 +41,8 @@ import org.zanata.common.LocaleId;
 import org.zanata.common.statistic.WordStatistic;
 import org.zanata.dao.VersionGroupDAO;
 import org.zanata.model.HAccount;
-import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
+import org.zanata.model.HPerson;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
@@ -340,6 +339,10 @@ public class VersionGroupHomeAction implements Serializable {
                 localeId));
     }
 
+    public List<HPerson> getMaintainers() {
+        return versionGroupDAO.getMaintainerBySlug(getSlug());
+    }
+
     /**
      * Load up statistics for all project versions in all active locales in the
      * group.
@@ -381,10 +384,7 @@ public class VersionGroupHomeAction implements Serializable {
 
     public List<HProjectIteration> getProjectIterations() {
         if (projectIterations == null) {
-            HIterationGroup group = versionGroupDAO.getBySlug(slug);
-            projectIterations =
-                    new ArrayList<HProjectIteration>(
-                            group.getProjectIterations());
+            projectIterations = versionGroupDAO.getVersionsBySlug(slug);
         }
         Collections.sort(projectIterations, versionComparator);
         return projectIterations;

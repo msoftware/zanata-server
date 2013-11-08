@@ -35,6 +35,7 @@ import org.jboss.seam.annotations.Scope;
 import org.zanata.common.EntityStatus;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HPerson;
+import org.zanata.model.HProjectIteration;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
@@ -89,6 +90,18 @@ public class VersionGroupDAO extends AbstractDAOImpl<HIterationGroup, Long> {
         q.setComment("VersionGroupDAO.getMaintainerBySlug");
         @SuppressWarnings("unchecked")
         List<HPerson> results = q.list();
+        return results;
+    }
+
+    public List<HProjectIteration> getVersionsBySlug(String slug) {
+        Query q =
+                getSession()
+                        .createQuery(
+                            "select g.projectIterations from HIterationGroup as g where g.slug = :slug");
+        q.setParameter("slug", slug);
+        q.setComment("VersionGroupDAO.getVersionsBySlug");
+        @SuppressWarnings("unchecked")
+        List<HProjectIteration> results = q.list();
         return results;
     }
 

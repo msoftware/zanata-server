@@ -3,7 +3,9 @@
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:a4j="http://richfaces.org/a4j"
   xmlns:rich="http://richfaces.org/rich"
-  xmlns:s="http://jboss.org/schema/seam/taglib">
+  xmlns:s="http://jboss.org/schema/seam/taglib"
+  xmlns:f="http://java.sun.com/jsf/core">
+
   <h1>#{messages['Settings']}</h1>
 
   <div class="tabs--vertical js-tabs">
@@ -58,17 +60,15 @@
         <h2 class="l--push-all-0 gamma d--bottom l--push-bottom-half">
           #{messages['jsf.Languages']}
         </h2>
-
-        <h3 class="delta">#{messages['jsf.ActiveLanguages']}</h3>
-        <h:form id="settings-language-form">
+        <h:form id="settings-languages-form">
           <ul class="list--slat l--push-top-half">
-            <ui:repeat value="#{versionGroupHome.activeLocales}" var="locale">
+            <ui:repeat value="#{versionGroupHome.getInstanceActiveLocales()}" var="locale">
               <li class="reveal">#{locale.retrieveDisplayName()}
                 <span class="txt--meta">[#{locale.localeId}]</span>
                 <a4j:commandLink
                   action="#{versionGroupHome.removeLanguage(locale)}"
                   styleClass="l--float-right txt--danger reveal__target"
-                  render="settings-language-form">
+                  render="settings-languages-form">
                   <i class="i--large i--remove"></i>
                 </a4j:commandLink>
               </li>
@@ -78,19 +78,20 @@
                 <div class="g__item w--7-10">
                   <s:decorate template="../field.xhtml" enclose="true"
                     id="newLanguageField">
-                    <rich:autocomplete mode="client" var="result"
+                    <rich:autocomplete mode="client" var="suggestLocale"
                       styleClass="auto-complete" id="newLanguage"
                       autocompleteMethod="#{versionGroupHome.suggestLocales}"
-                      fetchValue="#{result.localeId}" layout="table"
+                      fetchValue="#{suggestLocale.localeId}" layout="table"
                       value="#{versionGroupHome.newLanguage}">
                       <a4j:ajax event="change"
                         listener="#{versionGroupHome.validateLanguageName(component.id)}"
                         execute="@this" render="newLanguageField"/>
                       <h:column>
-                        <h:outputText value="#{result.localeId}"/>
+                        <h:outputText value="#{suggestLocale.localeId}"/>
                       </h:column>
                       <h:column>
-                        <h:outputText value="#{result.retrieveDisplayName()}"/>
+                        <h:outputText
+                          value="#{suggestLocale.retrieveDisplayName()}"/>
                       </h:column>
                     </rich:autocomplete>
                   </s:decorate>
@@ -98,18 +99,78 @@
                 <div class="g__item w--3-10">
                   <a4j:commandButton styleClass="button--full"
                     action="#{versionGroupHome.addLanguage()}"
-                    value="#{messages['Add']}" render="settings-language-form"/>
+                    value="#{messages['Add']}"
+                    render="settings-languages-form"/>
                 </div>
               </div>
             </li>
           </ul>
         </h:form>
       </li>
-      <li id="settings-projects"
-        class="">Tab content here, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis luctus nisi et eros bibendum lacinia. Curabitur sed est nec urna pretium vulputate ut eget lectus. In ultricies, tellus non vehicula malesuada, augue sem aliquet tellus, ut faucibus turpis ante quis nibh. Ut vel turpis tortor, a consectetur ipsum. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. more tab content and maybe some more.
+      <li id="settings-projects">
+        <h2 class="l--push-all-0 gamma d--bottom l--push-bottom-half">
+          #{messages['jsf.Projects']}
+        </h2>
+        <h:form id="settings-projects-form">
+          <ul class="list--slat l--push-top-half">
+            <ui:repeat
+              value="#{versionGroupHome.getInstanceProjectIterations()}"
+              var="version">
+              <li class="reveal">
+                <s:link value="#{version.project.name}"
+                  view="/project/project.xhtml"
+                  styleClass="l--push-right-quarter">
+                  <f:param name="slug"
+                    value="#{version.project.slug}"/>
+                </s:link>
+                <s:link view="/iteration/view.xhtml">
+                  <f:param name="projectSlug" value="#{version.project.slug}"/>
+                  <f:param name="iterationSlug" value="#{version.slug}"/>
+                  <i class="i i--version"></i> #{version.slug} <i
+                  class="i i--document"></i> #{version.documents.size}
+                </s:link>
+                <a4j:commandLink
+                  action="#{versionGroupHome.removeVersion(version)}"
+                  styleClass="l--float-right txt--danger reveal__target"
+                  render="settings-projects-form">
+                  <i class="i--large i--remove"></i>
+                </a4j:commandLink>
+              </li>
+            </ui:repeat>
+            <li>
+              <div class="g--tight">
+                <div class="g__item w--7-10">
+                  <s:decorate template="../field.xhtml" enclose="true"
+                    id="newVersionField">
+                    <rich:autocomplete mode="cachedAjax" var="suggestVersion"
+                      styleClass="auto-complete" id="newVersion"
+                      autocompleteMethod="#{versionGroupHome.suggestVersions}"
+                      fetchValue="#{suggestVersion.project.slug} #{suggestVersion.slug}" layout="table"
+                      value="#{versionGroupHome.newVersion}">
+                      <a4j:ajax event="change"
+                        listener="#{versionGroupHome.validateVersion(component.id)}"
+                        execute="@this" render="newVersionField"/>
+                      <h:column>
+                        <h:outputText value="#{suggestVersion.project.name}"/>
+                      </h:column>
+                      <h:column>
+                        <h:outputText value="#{suggestVersion.slug}"/>
+                      </h:column>
+                    </rich:autocomplete>
+                  </s:decorate>
+                </div>
+                <div class="g__item w--3-10">
+                  <a4j:commandButton styleClass="button--full"
+                    action="#{versionGroupHome.addVersion()}"
+                    value="#{messages['Add']}" render="settings-projects-form"/>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </h:form>
       </li>
-      <li id="settings-maintainers"
-        class="">Tab content here, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis luctus nisi et eros bibendum lacinia. Curabitur sed est nec urna pretium vulputate ut eget lectus. In ultricies, tellus non vehicula malesuada, augue sem aliquet tellus, ut faucibus turpis ante quis nibh. Ut vel turpis tortor, a consectetur ipsum. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. more tab content and maybe some more.
+      <li id="settings-maintainers">
+        Tab content here, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis luctus nisi et eros bibendum lacinia. Curabitur sed est nec urna pretium vulputate ut eget lectus. In ultricies, tellus non vehicula malesuada, augue sem aliquet tellus, ut faucibus turpis ante quis nibh. Ut vel turpis tortor, a consectetur ipsum. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. Sed posuere commodo vestibulum. Pellentesque volutpat diam sem. more tab content and maybe some more.
       </li>
     </ul>
   </div>
