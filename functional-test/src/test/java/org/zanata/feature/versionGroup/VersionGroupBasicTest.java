@@ -20,6 +20,8 @@
  */
 package org.zanata.feature.versionGroup;
 
+import java.util.List;
+
 import org.concordion.api.extension.Extensions;
 import org.concordion.ext.ScreenshotExtension;
 import org.concordion.ext.TimestampFormatterExtension;
@@ -39,8 +41,6 @@ import org.zanata.page.utility.DashboardPage;
 import org.zanata.util.AddUsersRule;
 import org.zanata.workflow.LoginWorkFlow;
 import org.zanata.workflow.ProjectWorkFlow;
-
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
