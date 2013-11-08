@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.zanata.feature.DetailedTest;
 import org.zanata.page.projects.ProjectMaintainersPage;
-import org.zanata.util.ResetDatabaseRule;
+import org.zanata.util.SampleProjectRule;
 import org.zanata.workflow.LoginWorkFlow;
 
 import static org.junit.Assume.assumeTrue;
@@ -41,8 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class EditMaintainersTest {
 
     @Rule
-    public ResetDatabaseRule resetDatabaseRule =
-            new ResetDatabaseRule(ResetDatabaseRule.Config.WithData);
+    public SampleProjectRule sampleProjectRule = new SampleProjectRule();
 
     @Test
     public void maintainerDetailsAreDisplayed() {
