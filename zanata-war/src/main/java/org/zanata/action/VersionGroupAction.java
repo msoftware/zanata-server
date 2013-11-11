@@ -31,11 +31,16 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Transactional;
+import org.jboss.seam.annotations.security.Restrict;
+import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
+import org.zanata.model.HProjectIteration;
 import org.zanata.service.VersionGroupService;
+import org.zanata.service.VersionGroupService.SelectableHProject;
 
 @Name("versionGroupAction")
 @Scope(ScopeType.PAGE)
@@ -48,8 +53,17 @@ public class VersionGroupAction implements Serializable {
     @In(required = false, value = JpaIdentityStore.AUTHENTICATED_USER)
     HAccount authenticatedAccount;
 
+    @RequestParameter
+    private String[] slugParam;
+
     @Setter
     private List<HIterationGroup> allVersionGroups;
+
+    private List<SelectableHProject> searchResults;
+
+    private HIterationGroup group;
+
+    private String searchTerm = "";
 
     @Getter
     @Setter
@@ -63,10 +77,110 @@ public class VersionGroupAction implements Serializable {
     @Setter
     private boolean showObsoleteGroups = false;
 
+    @Getter
+    @Setter
+    private boolean selectAll = false;
+
+    public boolean isParamExists() {
+        return slugParam != null && slugParam.length != 0;
+    }
+
     public void loadAllActiveGroupsOrIsMaintainer() {
         allVersionGroups =
                 versionGroupServiceImpl
                         .getAllActiveVersionGroupsOrIsMaintainer();
+    }
+
+    public void init(String slug) {
+        group = versionGroupServiceImpl.getBySlug(slug);
+    }
+
+    public void addSelected() {
+        for (SelectableHProject selectableVersion : getSearchResults()) {
+            if (selectableVersion.isSelected()) {
+                joinVersionGroup(selectableVersion.getProjectIteration()
+                        .getId());
+            }
+        }
+    }
+
+    public void selectAll() {
+        for (SelectableHProject selectableVersion : getSearchResults()) {
+            if (!isVersionInGroup(selectableVersion.getProjectIteration()
+                    .getId())) {
+                selectableVersion.setSelected(selectAll);
+            }
+        }
+    }
+
+    /**
+     * Run search on unique project version if projectSlug, iterationSlug exits
+     * else search versions available
+     */
+    public void executePreSearch() {
+        if (isParamExists()) {
+            for (String param : slugParam) {
+                String[] paramSet = param.split(":");
+
+                if (paramSet.length == 2) {
+                    HProjectIteration projectVersion =
+                            versionGroupServiceImpl.getProjectIterationBySlug(
+                                    paramSet[0], paramSet[1]);
+                    if (projectVersion != null) {
+                        getSearchResults().add(
+                                new SelectableHProject(projectVersion, true));
+                    }
+                }
+            }
+        } else {
+            searchProjectAndVersion();
+        }
+
+    }
+
+    public String getSearchTerm() {
+        return searchTerm;
+    }
+
+    public void setSearchTerm(String searchTerm) {
+        this.searchTerm = searchTerm;
+    }
+
+    public List<SelectableHProject> getSearchResults() {
+        if (searchResults == null) {
+            searchResults = new ArrayList<SelectableHProject>();
+        }
+        return searchResults;
+    }
+
+    public boolean isVersionInGroup(Long projectIterationId) {
+        return versionGroupServiceImpl.isVersionInGroup(group.getSlug(),
+                projectIterationId);
+    }
+
+    @Transactional
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    private void joinVersionGroup(Long projectIterationId) {
+        versionGroupServiceImpl.joinVersionGroup(group.getSlug(),
+                projectIterationId);
+    }
+
+    @Transactional
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    public void leaveVersionGroup(Long projectIterationId) {
+        versionGroupServiceImpl.leaveVersionGroup(group.getSlug(),
+                projectIterationId);
+        searchProjectAndVersion();
+    }
+
+    public void searchProjectAndVersion() {
+        getSearchResults().clear();
+        List<HProjectIteration> result =
+                versionGroupServiceImpl
+                        .searchLikeSlugOrProjectSlug(this.searchTerm);
+        for (HProjectIteration version : result) {
+            getSearchResults().add(new SelectableHProject(version, false));
+        }
     }
 
     private boolean filterGroupByStatus(HIterationGroup group) {
@@ -80,6 +194,11 @@ public class VersionGroupAction implements Serializable {
             return isShowActiveGroups();
         }
         return false;
+    }
+
+    public boolean isUserProjectMaintainer() {
+        return authenticatedAccount != null
+                && authenticatedAccount.getPerson().isMaintainerOfProjects();
     }
 
     public List<HIterationGroup> getAllVersionGroups() {

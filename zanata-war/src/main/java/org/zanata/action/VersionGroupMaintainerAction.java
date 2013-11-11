@@ -6,16 +6,16 @@ import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.datamodel.DataModel;
 import org.jboss.seam.annotations.datamodel.DataModelSelection;
 import org.jboss.seam.annotations.security.Restrict;
 import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.log.Log;
 import org.zanata.dao.AccountDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
@@ -24,6 +24,7 @@ import org.zanata.service.VersionGroupService;
 
 @Name("versionGroupMaintainerAction")
 @Scope(ScopeType.PAGE)
+@Slf4j
 public class VersionGroupMaintainerAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -45,13 +46,9 @@ public class VersionGroupMaintainerAction implements Serializable {
     @In
     private AccountDAO accountDAO;
 
-    @Logger
-    Log log;
-
     public void init() {
         maintainerList = versionGroupServiceImpl.getMaintainerBySlug(slug);
     }
-
 
     public HPerson getSelectedPerson() {
         return this.selectedPerson;
@@ -91,7 +88,7 @@ public class VersionGroupMaintainerAction implements Serializable {
             personList.add(a.getPerson());
             versionGroupServiceImpl.makePersistent(iterationGroup);
             versionGroupServiceImpl.flush();
-            log.debug("add {0} into maintainers", account);
+            log.debug("add {} into maintainers", account);
             return "success";
         } else {
             FacesMessages.instance().add("This account is disabled.");
