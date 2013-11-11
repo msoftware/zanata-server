@@ -44,10 +44,12 @@ import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.security.management.JpaIdentityStore;
 import org.zanata.common.EntityStatus;
 import org.zanata.common.LocaleId;
+import org.zanata.dao.PersonDAO;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HLocale;
+import org.zanata.model.HPerson;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.LocaleService;
 import org.zanata.service.SlugEntityService;
@@ -82,6 +84,9 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     private LocaleService localeServiceImpl;
 
     @In
+    private PersonDAO personDAO;
+
+    @In
     private VersionGroupService versionGroupServiceImpl;
 
     @In
@@ -96,12 +101,18 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
 
     @Getter
     @Setter
+    // locale id
     private String newLanguage;
 
     @Getter
     @Setter
     // Slug of project [space] version
     private String newVersion;
+
+    @Getter
+    @Setter
+    // username
+    private String newMaintainer;
 
     public void verifySlugAvailable(ValueChangeEvent e) {
         String slug = (String) e.getNewValue();
@@ -145,6 +156,10 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         return getAvailableStatus();
     }
 
+    public void setStatus(char initial) {
+        getInstance().setStatus(EntityStatus.valueOf(initial));
+    }
+
     public List<HLocale> suggestLocales(final String query) {
         if (supportedLocales == null) {
             supportedLocales = localeServiceImpl.getSupportedLocales();
@@ -154,7 +169,9 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 Collections2.filter(supportedLocales, new Predicate<HLocale>() {
                     @Override
                     public boolean apply(@Nullable HLocale input) {
-                        return input.getLocaleId().getId().startsWith(query);
+                        return input.getLocaleId().getId().startsWith(query)
+                                || input.retrieveDisplayName().toLowerCase()
+                                        .contains(query.toLowerCase());
                     }
                 });
 
@@ -163,6 +180,10 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
 
     public List<HProjectIteration> suggestVersions(final String query) {
         return versionGroupServiceImpl.searchLikeSlugOrProjectSlug(query);
+    }
+
+    public List<HPerson> suggestMaintainers(final String query) {
+        return personDAO.findAllContainingName(query);
     }
 
     @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
@@ -197,6 +218,20 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     }
 
     @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    public void addMaintainer() {
+        if (!validateMaintainer("newMaintainer")) {
+            return; // not success
+        }
+        HPerson maintainer = personDAO.findByUsername(newMaintainer);
+        getInstance().getMaintainers().add(maintainer);
+        super.update();
+
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.MaintainerAddedToGroup",
+                        maintainer.getName()));
+    }
+
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
     public void removeLanguage(HLocale locale) {
         getInstance().getActiveLocales().remove(locale);
         super.update();
@@ -213,6 +248,15 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.VersionRemoveFromGroup",
                         version.getSlug()));
+    }
+
+    @Restrict("#{s:hasPermission(versionGroupHome.instance, 'update')}")
+    public void removeMaintainer(HPerson maintainer) {
+        getInstance().getMaintainers().remove(maintainer);
+        super.update();
+        FacesMessages.instance().add(
+                zanataMessages.getMessage("jsf.MaintainerRemoveFromGroup",
+                        maintainer.getName()));
     }
 
     public List<HLocale> getInstanceActiveLocales() {
@@ -254,6 +298,10 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
     public List<HProjectIteration> getInstanceProjectIterations() {
         return new ArrayList<HProjectIteration>(getInstance()
                 .getProjectIterations());
+    }
+
+    public List<HPerson> getInstanceMaintainers() {
+        return new ArrayList<HPerson>(getInstance().getMaintainers());
     }
 
     @Override
@@ -347,6 +395,30 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
             return false;
         }
 
+        return true;
+    }
+
+    public boolean validateMaintainer(String componentId) {
+        if (StringUtils.isEmpty(newMaintainer)) {
+            return false;
+        }
+
+        // check if username exist
+        HPerson person = personDAO.findByUsername(newMaintainer);
+        if (person == null) {
+            FacesMessages.instance().addToControl(componentId,
+                    zanataMessages.getMessage("jsf.InvalidUsername"));
+            return false;
+        }
+
+        // check if person is already a maintainer
+        if (getInstanceMaintainers().contains(person)) {
+            FacesMessages.instance().addToControl(
+                    componentId,
+                    zanataMessages.getMessage("jsf.UserIsAMaintainer",
+                            newMaintainer));
+            return false;
+        }
         return true;
     }
 }

@@ -16,81 +16,104 @@
 
 
 <ui:define name="center_content">
-  <script type="text/javascript">
-    jQuery(document).ready(function () {
-      checkHashUrl();
-      renderStatistics();
-    });
+<script type="text/javascript">
+  jQuery(document).ready(function () {
+    checkHashUrl();
+    renderStatistics();
+  });
 
-    function checkHashUrl() {
-      var selectedTabId = "#languages_tab"; //default to language tab
-      if (window.location.hash) {
-        if (tabExist(window.location.hash + "_tab")) {
-          selectedTabId = window.location.hash + "_tab";
-        }
+  function checkHashUrl() {
+    var selectedTabId = "#languages_tab"; //default to language tab
+    var originalHashUrl = window.location.hash;
+
+    if (window.location.hash) {
+      if (window.location.hash.substring(0, 9) == '#settings') {
+        window.location.hash = "#settings";
       }
-      jQuery(selectedTabId)[0].click();
+
+      if (elementExist(window.location.hash + "_tab")) {
+        selectedTabId = window.location.hash + "_tab";
+      }
     }
+    jQuery(selectedTabId)[0].click();
 
-    function tabExist(hashId) {
-      return jQuery(hashId).length != 0;
+    if (window.location.hash.substring(0, 9) == "#settings") {
+      handleSettingsTab(originalHashUrl);
     }
+  }
 
-    function setActiveTab(clickedTab) {
-      jQuery(clickedTab).parent().siblings("li").children("a").removeClass('is-active');
-      jQuery(clickedTab).addClass("is-active");
-
-      jQuery("[id$=_content]").addClass('is-hidden');
-      jQuery(jQuery(clickedTab).attr('href') + '_content').removeClass('is-hidden');
+  function handleSettingsTab(hashUrl) {
+    var selectedSettingsTabId = "#settings-general_tab"; //default to general tab
+    if (elementExist(hashUrl)) {
+      selectedSettingsTabId = hashUrl + "_tab";
     }
+    jQuery(selectedSettingsTabId)[0].click();
+  }
 
-    function updateActiveRow(clickedElement) {
-      jQuery(clickedElement).parent().siblings("li").removeClass('is-active');
-      jQuery(clickedElement).parent().addClass('is-active');
+  function elementExist(hashId) {
+    return jQuery(hashId).length != 0;
+  }
 
-      jQuery(clickedElement).parent().siblings("li").children("a").removeClass('is-active');
-    }
+  function setActiveTab(clickedTab) {
+    jQuery(clickedTab).parent().siblings("li").children("a").removeClass('is-active');
+    jQuery(clickedTab).addClass("is-active");
 
-    function toggleColumn() {
-      jQuery('.panels--2').toggleClass('panel__active-2');
-    }
-  </script>
+    jQuery("[id$=_content]").addClass('is-hidden');
+    jQuery(jQuery(clickedTab).attr('href') +
+      '_content').removeClass('is-hidden');
+  }
 
-  <a4j:jsFunction name="renderStatistics"
-    render="overall_statistic, languages-language_list, projects-project_list"
-    action="#{versionGroupHomeAction.setPageRendered(true)}"/>
+  function updateActiveRow(clickedElement) {
+    jQuery(clickedElement).parent().siblings("li").removeClass('is-active');
+    jQuery(clickedElement).parent().addClass('is-active');
 
-  <div class="g">
-    <div class="g__item w--1-2-m w--3-8-l w--1-3 l--push-bottom-1">
-      <p class="txt--meta l--push-all-0">
-        <s:link view="/version-group/home.xhtml" propagation="none">
-          #{messages['jsf.Groups']}
-        </s:link>
-      </p>
+    jQuery(clickedElement).parent().siblings("li").children("a").removeClass('is-active');
+  }
 
-      <div class="media l--push-bottom-half">
-        <div class="media__body">
-          <h1 class="l--push-all-0">
-            #{versionGroupHome.instance.name}
-          </h1>
+  function toggleColumn() {
+    jQuery('.panels--2').toggleClass('panel__active-2');
+  }
+</script>
 
-          <p class="txt--understated">
-            #{versionGroupHome.instance.description}
-          </p>
-        </div>
+<a4j:jsFunction name="refreshStatistics"
+  action="#{versionGroupHomeAction.resetPageData}"
+  render="overall_statistic, languages-language_list, projects-project_list,languages-size,projects-size"/>
+
+<a4j:jsFunction name="renderStatistics"
+  render="overall_statistic, languages-language_list, projects-project_list"
+  action="#{versionGroupHomeAction.setPageRendered(true)}"/>
+
+<div class="g">
+  <div class="g__item w--1-2-m w--3-8-l w--1-3 l--push-bottom-1">
+    <p class="txt--meta l--push-all-0">
+      <s:link view="/version-group/home.xhtml" propagation="none">
+        #{messages['jsf.Groups']}
+      </s:link>
+    </p>
+
+    <div class="media l--push-bottom-half">
+      <div class="media__body">
+        <h1 class="l--push-all-0">
+          #{versionGroupHome.instance.name}
+        </h1>
+
+        <p class="txt--understated">
+          #{versionGroupHome.instance.description}
+        </p>
       </div>
+    </div>
 
-      <a4j:outputPanel id="overall_statistic">
-        <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
-          <p class="d--top l--pad-top-half txt--mini">
-            #{messages['jsf.TotalSourceContains']}
-            <strong>#{versionGroupHomeAction.getOverallStatistic().getTotalWordCount()}
-              words /
-              #{versionGroupHomeAction.getOverallStatistic().getTotalMessageCount()}
-              messages</strong>
-          </p>
-          <ul class="g g--fit">
-            <li class="g__item">
+    <a4j:outputPanel id="overall_statistic">
+      <s:fragment rendered="#{versionGroupHomeAction.pageRendered}">
+        <p class="d--top l--pad-top-half txt--mini">
+          #{messages['jsf.TotalSourceContains']}
+          <strong>#{versionGroupHomeAction.getOverallStatistic().getTotalWordCount()}
+            words /
+            #{versionGroupHomeAction.getOverallStatistic().getTotalMessageCount()}
+            messages</strong>
+        </p>
+        <ul class="g g--fit">
+          <li class="g__item">
                 <span class="stats--large txt--state-success">
                   <span class="stats__figure">
                     #{statisticBar.formatPercentage(versionGroupHomeAction.getOverallStatistic().statistic.percentTranslated)}%
@@ -99,8 +122,8 @@
                     #{messages['jsf.stats.Translated']}
                   </span>
                 </span>
-            </li>
-            <li class="g__item">
+          </li>
+          <li class="g__item">
                 <span class="stats--large">
                   <span class="stats__figure">
                     #{statisticBar.formatHours(versionGroupHomeAction.getOverallStatistic().statistic.remainingHours)}
@@ -109,103 +132,104 @@
                     #{messages['jsf.stats.TotalHoursRemaining']}
                   </span>
                 </span>
-            </li>
-          </ul>
-          <div class="progress-bar__expander l--push-v-1">
-            <zanata:statistic
-              value="#{versionGroupHomeAction.getOverallStatistic().statistic}"
-              type="large"/>
-          </div>
-        </s:fragment>
-        <zanata:loader type="large"
-          rendered="#{!versionGroupHomeAction.pageRendered}"/>
-      </a4j:outputPanel>
-    </div>
+          </li>
+        </ul>
+        <div class="progress-bar__expander l--push-v-1">
+          <zanata:statistic
+            value="#{versionGroupHomeAction.getOverallStatistic().statistic}"
+            type="large"/>
+        </div>
+      </s:fragment>
+      <zanata:loader type="large"
+        rendered="#{!versionGroupHomeAction.pageRendered}"/>
+    </a4j:outputPanel>
+  </div>
 
 
-    <div class="g__item w--1-2-m w--5-8-l w--2-3">
-      <div class="tabs--lined">
-        <nav class="tabs__nav">
-          <ul>
-            <li>
-              <a href="#languages" id="languages_tab"
-                onclick="setActiveTab(this)">
-                <i class="i i--language"></i>
+  <div class="g__item w--1-2-m w--5-8-l w--2-3">
+    <div class="tabs--lined">
+      <nav class="tabs__nav">
+        <ul>
+          <li>
+            <a href="#languages" id="languages_tab"
+              onclick="setActiveTab(this)">
+              <i class="i i--language"></i>
                   <span class="is-hidden--m-down">
                     #{messages['jsf.Languages']}
                   </span>
-                  <span class="txt--neutral">
-                    #{versionGroupHomeAction.activeLocales.size}
-                  </span>
-              </a>
-            </li>
-            <li>
-              <a href="#projects" id="projects_tab"
-                onclick="setActiveTab(this)">
-                <i class="i i--project"></i>
+              <a4j:outputPanel styleClass="txt--neutral" id="languages-size">
+                #{versionGroupHomeAction.activeLocales.size}
+              </a4j:outputPanel>
+            </a>
+          </li>
+          <li>
+            <a href="#projects" id="projects_tab"
+              onclick="setActiveTab(this)">
+              <i class="i i--project"></i>
                   <span class="is-hidden--m-down">
                     #{messages['jsf.Projects']}
                   </span>
-                  <span class="txt--neutral">
-                    #{versionGroupHomeAction.getProjectIterations().size}
-                  </span>
-              </a>
-            </li>
-            <li>
-              <a href="#maintainers" id="maintainers_tab"
-                onclick="setActiveTab(this)">
-                <i class="i i--users"></i>
+              <a4j:outputPanel styleClass="txt--neutral" id="projects-size">
+                #{versionGroupHomeAction.getProjectIterations().size}
+              </a4j:outputPanel>
+            </a>
+          </li>
+          <li>
+            <a href="#maintainers" id="maintainers_tab"
+              onclick="setActiveTab(this)">
+              <i class="i i--users"></i>
                   <span class="is-hidden--m-down">
                     #{messages['jsf.Maintainers']}
                   </span>
-                  <span class="txt--neutral">
-                    #{versionGroupHome.instance.maintainers.size}
-                  </span>
-              </a>
-            </li>
-            <s:fragment
-              rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
-              <li>
-                <a href="#settings" id="settings_tab"
-                  onclick="setActiveTab(this)">
-                  <i class="i i--settings"></i>
+              <a4j:outputPanel styleClass="txt--neutral"
+                id="maintainers-size">
+                #{versionGroupHome.instance.maintainers.size}
+              </a4j:outputPanel>
+            </a>
+          </li>
+          <s:fragment
+            rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
+            <li>
+              <a href="#settings" id="settings_tab"
+                onclick="setActiveTab(this)">
+                <i class="i i--settings"></i>
                   <span class="is-hidden--m-down">
                     #{messages['jsf.Settings']}
                   </span>
-                </a>
-              </li>
-            </s:fragment>
-          </ul>
-        </nav>
-
-        <div class="tabs__content panels__container l--push-top-1">
-          <div id="languages_content" class="is-hidden">
-            <ui:include
-              src="../WEB-INF/layout/version-group/languages-tab.xhtml">
-            </ui:include>
-          </div>
-
-          <div id="projects_content" class="is-hidden">
-            <ui:include
-              src="../WEB-INF/layout/version-group/projects-tab.xhtml"/>
-          </div>
-
-          <div id="maintainers_content" class="is-hidden">
-            <ui:include
-              src="../WEB-INF/layout/version-group/maintainers-tab.xhtml"/>
-          </div>
-
-          <s:fragment
-            rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
-            <div id="settings_content" class="is-hidden">
-              <ui:include
-                src="../WEB-INF/layout/version-group/settings-tab.xhtml"/>
-            </div>
+              </a>
+            </li>
           </s:fragment>
+        </ul>
+      </nav>
+
+      <div class="tabs__content panels__container l--push-top-1">
+        <div id="languages_content" class="is-hidden">
+          <ui:include
+            src="../WEB-INF/layout/version-group/languages-tab.xhtml">
+          </ui:include>
         </div>
+
+        <div id="projects_content" class="is-hidden">
+          <ui:include
+            src="../WEB-INF/layout/version-group/projects-tab.xhtml"/>
+        </div>
+
+        <div id="maintainers_content" class="is-hidden">
+          <ui:include
+            src="../WEB-INF/layout/version-group/maintainers-tab.xhtml"/>
+        </div>
+
+        <s:fragment
+          rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
+          <div id="settings_content" class="is-hidden">
+            <ui:include
+              src="../WEB-INF/layout/version-group/settings-tab.xhtml"/>
+          </div>
+        </s:fragment>
       </div>
     </div>
   </div>
+</div>
 </ui:define>
 
 </ui:composition>

@@ -389,4 +389,11 @@ public class VersionGroupHomeAction implements Serializable {
         Collections.sort(projectIterations, versionComparator);
         return projectIterations;
     }
+
+    // reset all page cached statistics
+    public void resetPageData() {
+        projectIterations = null;
+        activeLocales = null;
+        loadStatistic();
+    }
 }

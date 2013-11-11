@@ -6,7 +6,7 @@
   xmlns:a4j="http://richfaces.org/a4j"
   xmlns:f="http://java.sun.com/jsf/core">
 
-  <div class="panels--2 panel__active-2">
+  <div class="panels--2">
     <div class="g--collapsed">
       <div class="g__item w--1-2 w--1-2-s panels__panel">
         <div class="bg--pop-high">
@@ -27,7 +27,7 @@
               </div>
             </div>
           </div>
-          <h:form id="projects-project_list">
+          <h:form id="projects-project_list" styleClass="l--push-bottom-0">
             <s:fragment
               rendered="#{versionGroupHomeAction.getProjectIterations().isEmpty()}">
               <div class="l--pad-all-half">
@@ -36,7 +36,7 @@
                 <s:fragment
                   rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                   <p>
-                    <a href="#settings" class="button--primary">
+                    <a href="#settings" class="button--primary" onclick="checkHashUrl()">
                       #{messages['jsf.AddProjectVersions']}
                     </a>
                   </p>
@@ -117,7 +117,7 @@
               </div>
             </div>
           </div>
-          <h:form id="projects-language_list">
+          <h:form id="projects-language_list" styleClass="l--push-bottom-0">
             <s:fragment
               rendered="#{versionGroupHomeAction.selectedVersion == null}">
               <div class="l--pad-all-half">
@@ -127,13 +127,13 @@
               </div>
             </s:fragment>
             <s:fragment
-              rendered="#{versionGroupHomeAction.getActiveLocales().isEmpty()}">
+              rendered="#{versionGroupHomeAction.selectedVersion != null and versionGroupHomeAction.getActiveLocales().isEmpty()}">
               <div class="l--pad-all-half">
                 <p class="txt--meta">#{messages['jsf.NoActiveLanguages']}</p>
                 <s:fragment
                   rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                   <p>
-                    <a href="#settings" class="button--primary">
+                    <a href="#settings" class="button--primary" onclick="checkHashUrl()">
                       #{messages['jsf.AddLanguages']}
                     </a>
                   </p>
@@ -145,7 +145,7 @@
               <ul class="list--stats">
                 <ui:repeat
                   value="#{versionGroupHomeAction.getActiveLocales()}"
-                  var="locale">
+                  var="hLocale">
                   <li
                     class="progress-bar__expander panels__panel__item bg--highest--hover">
                     <a href="#">
@@ -153,18 +153,25 @@
                         <div class="list__item__info">
                           <span class="list__title">
                             <span class="list__title">
-                            <s:link view="/language/language.xhtml"
-                              propagation="none"
-                              value="${locale.retrieveDisplayName()}">
-                              <f:param name="id" value="#{locale.localeId.id}"/>
-                            </s:link>
+                              <h:outputLink
+                                value="#{request.contextPath}/webtrans/Application.seam">
+                                <f:param name="project"
+                                  value="#{versionGroupHomeAction.selectedVersion.project.slug}"/>
+                                <f:param name="iteration"
+                                  value="#{versionGroupHomeAction.selectedVersion.slug}"/>
+                                <f:param name="localeId"
+                                  value="#{hLocale.localeId}"/>
+                                <f:param name="locale"
+                                  value="#{locale.language}"/>
+                                ${hLocale.retrieveDisplayName()}
+                              </h:outputLink>
                           </span>
                           </span>
                         </div>
                         <div class="list__item__stats">
                           <span class="stats--small">
                             <span class="stats__figure">
-                              ${versionGroupHomeAction.getStatisticFigureForProjectWithLocale(versionGroupHomeAction.languageSortingList.selectedSortOption, locale.localeId, versionGroupHomeAction.selectedVersion.id)}
+                              ${versionGroupHomeAction.getStatisticFigureForProjectWithLocale(versionGroupHomeAction.languageSortingList.selectedSortOption, hLocale.localeId, versionGroupHomeAction.selectedVersion.id)}
                             </span>
                             <span class="stats__unit txt--lowercase">
                               ${versionGroupHomeAction.getStatisticUnit(versionGroupHomeAction.languageSortingList.selectedSortOption)}
@@ -173,7 +180,7 @@
                         </div>
                       </div>
                       <zanata:statistic
-                        value="${versionGroupHomeAction.getSelectedVersionStatistic(locale.localeId)}"/>
+                        value="${versionGroupHomeAction.getSelectedVersionStatistic(hLocale.localeId)}"/>
                     </a>
                   </li>
                 </ui:repeat>

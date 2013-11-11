@@ -1,9 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:s="http://jboss.org/schema/seam/taglib"
-  xmlns:ui="http://java.sun.com/jsf/facelets"
-  xmlns:h="http://java.sun.com/jsf/html"
-  xmlns:zanata="http://java.sun.com/jsf/composite/zanata"
-  xmlns:a4j="http://richfaces.org/a4j">
+  xmlns:ui="http://java.sun.com/jsf/facelets">
   <div class="bg--pop-high">
     <div class="panels__panel__header">
       <div class="g--tight">
@@ -22,7 +18,7 @@
       <ui:repeat value="#{versionGroupHomeAction.maintainers}" var="maintainer">
         <li class="l--pad-all-half">
           <span class="w--r-1 bx--round l--push-right-quarter">
-            <img src="#{gravatarServiceImpl.getUserImageUrl(48)}"
+            <img src="#{gravatarServiceImpl.getUserImageUrl(48, maintainer.email)}"
               alt="#{maintainer.name}"/>
           </span>
           #{maintainer.name}

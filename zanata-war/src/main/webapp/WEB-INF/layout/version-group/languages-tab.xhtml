@@ -6,7 +6,7 @@
   xmlns:a4j="http://richfaces.org/a4j"
   xmlns:f="http://java.sun.com/jsf/core">
 
-  <div class="panels--2 panel__active-2">
+  <div class="panels--2">
     <div class="g--collapsed">
       <div class="g__item w--1-2 w--1-2-s panels__panel">
         <div class="bg--pop-high">
@@ -27,7 +27,7 @@
               </div>
             </div>
           </div>
-          <h:form id="languages-language_list">
+          <h:form id="languages-language_list" styleClass="l--push-bottom-0">
             <s:fragment
               rendered="#{versionGroupHomeAction.getActiveLocales().isEmpty()}">
               <div class="l--pad-all-half">
@@ -35,7 +35,7 @@
                 <s:fragment
                   rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                   <p>
-                    <a href="#settings" class="button--primary">
+                    <a href="#settings" class="button--primary" onclick="checkHashUrl()">
                       #{messages['jsf.AddLanguages']}
                     </a>
                   </p>
@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <div class="g__item w--1-2 w--1-2-s panels__panel is-active">
+      <div class="g__item w--1-2 w--1-2-s panels__panel">
         <s:div styleClass="bg--pop-higher">
           <div class="panels__panel__header">
             <div class="g--tight">
@@ -117,7 +117,7 @@
               </div>
             </div>
           </div>
-          <h:form id="languages-project_list">
+          <h:form id="languages-project_list" styleClass="l--push-bottom-0">
             <s:fragment
               rendered="#{versionGroupHomeAction.selectedLocale == null}">
               <div class="l--pad-all-half">
@@ -127,14 +127,14 @@
               </div>
             </s:fragment>
             <s:fragment
-              rendered="#{versionGroupHomeAction.getProjectIterations().isEmpty()}">
+              rendered="#{versionGroupHomeAction.selectedLocale != null and versionGroupHomeAction.getProjectIterations().isEmpty()}">
               <div class="l--pad-all-half">
                 <p class="txt--meta">#{messages['jsf.NoProjectsInGroup']}</p>
 
                 <s:fragment
                   rendered="#{s:hasPermission(versionGroupHome.instance, 'update')}">
                   <p>
-                    <a href="#settings" class="button--primary">
+                    <a href="#settings" class="button--primary" onclick="checkHashUrl()">
                       #{messages['jsf.AddProjectVersions']}
                     </a>
                   </p>
@@ -153,11 +153,6 @@
                       <div class="list__item">
                         <div class="list__item__info">
                           <span class="list__title">
-                            <s:link value="#{version.project.name}"
-                              view="/project/project.xhtml">
-                              <f:param name="slug"
-                                value="#{version.project.slug}"/>
-                            </s:link>
                             <h:outputLink
                               value="#{request.contextPath}/webtrans/Application.seam">
                               <f:param name="project"
@@ -168,7 +163,7 @@
                                 value="#{versionGroupHomeAction.selectedLocale.localeId}"/>
                               <f:param name="locale"
                                 value="#{locale.language}"/>
-                              <i class="i i--version"></i> #{version.slug}
+                              #{version.project.name} <i class="i i--version"></i> #{version.slug}
                             </h:outputLink>
                           </span>
                         </div>
