@@ -408,34 +408,9 @@
   <page view-id="/version-group/version_group.xhtml">
     <param name="versionGroupSlug" value="#{versionGroupHomeAction.slug}" />
     <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-
     <action execute="#{versionGroupHome.validateSuppliedId}" />
 
     <navigation from-action="#{versionGroupHome.update}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-  </page>
-
-  <page view-id="/version-group/settings.xhtml" login-required="true">
-    <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-    <param name="versionGroupSlug"
-      value="#{versionGroupMaintainerAction.slug}" />
-    <param name="versionGroupSlug" value="#{versionGroupJoinAction.slug}" />
-    <action
-      execute="#{identity.checkPermission(versionGroupHome.instance, 'update')}" />
-
-    <action execute="#{versionGroupMaintainerAction.init()}" />
-    <action execute="#{versionGroupJoinAction.executePreSearch()}"
-      on-postback="false" />
-
-    <navigation from-action="#{versionGroupHome.update}">
-      <redirect view-id="/version-group/version_group.xhtml">
-        <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
-      </redirect>
-    </navigation>
-    <navigation from-action="#{versionGroupHome.cancel}">
       <redirect view-id="/version-group/version_group.xhtml">
         <param name="versionGroupSlug" value="#{versionGroupHome.slug}" />
       </redirect>
@@ -454,7 +429,7 @@
     <action
       execute="#{breadcrumbs.addLocation('/version-group/version_group.xhtml', versionGroupJoinAction.slug).param('versionGroupSlug', versionGroupJoinAction.slug)}" />
     <action
-      execute="#{breadcrumbs.addLocation('', messages['jsf.RequestToJoinVersionGroup'])}" />
+      execute="#{breadcrumbs.addLocation('', messages['jsf.RequestJoinGroup'])}" />
 
     <navigation from-action="#{versionGroupJoinAction.send}">
       <rule if-outcome="success">
@@ -908,9 +883,9 @@
     <action
       execute="#{breadcrumbs.addLocation('/iteration/view.xhtml', versionGroupJoinAction.iterationSlug).param('projectSlug', versionGroupJoinAction.projectSlug).param('iterationSlug', versionGroupJoinAction.iterationSlug)}" />
     <action
-      execute="#{breadcrumbs.addLocation('/version-group/version_group.xhtml', versionGroupJoinAction.group.slug).param('versionGroupSlug', versionGroupJoinAction.group.slug)}" />
+      execute="#{breadcrumbs.addLocation('/version-group/version_group.xhtml', versionGroupJoinAction.slug).param('versionGroupSlug', versionGroupJoinAction.slug)}" />
     <action
-      execute="#{breadcrumbs.addLocation('', messages['jsf.RequestToJoinVersionGroup'])}" />
+      execute="#{breadcrumbs.addLocation('', messages['jsf.RequestAddProjectToGroup'])}" />
 
 
     <navigation from-action="#{versionGroupJoinAction.send}">

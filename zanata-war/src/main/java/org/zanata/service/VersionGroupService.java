@@ -21,7 +21,9 @@
 package org.zanata.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.zanata.common.LocaleId;
 import org.zanata.model.HIterationGroup;
 import org.zanata.model.HPerson;
 import org.zanata.model.HProjectIteration;
@@ -54,6 +56,16 @@ public interface VersionGroupService {
     boolean isVersionInGroup(String groupSlug, Long projectIterationId);
 
     boolean isGroupInVersion(String groupSlug, Long id);
+
+    /**
+     * Get the map of versions that doesn't contained all active locales of the
+     * group.
+     *
+     * @param groupSlug
+     * @return
+     */
+    Map<LocaleId, List<HProjectIteration>> getMissingLocaleVersionMap(
+        String groupSlug);
 
     public final class SelectableHProject {
         private HProjectIteration projectIteration;

@@ -46,6 +46,7 @@ import org.zanata.model.HPerson;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.GroupStatisticService;
 import org.zanata.service.LocaleService;
+import org.zanata.service.VersionGroupService;
 import org.zanata.service.VersionLocaleKey;
 import org.zanata.util.StatisticsUtil;
 import org.zanata.util.ZanataMessages;
@@ -67,6 +68,9 @@ public class VersionGroupHomeAction implements Serializable {
 
     @In
     private GroupStatisticService groupStatisticServiceImpl;
+
+    @In
+    private VersionGroupService versionGroupServiceImpl;
 
     @In
     private ZanataMessages zanataMessages;
@@ -100,6 +104,8 @@ public class VersionGroupHomeAction implements Serializable {
     private List<HProjectIteration> projectIterations;
 
     private Map<VersionLocaleKey, WordStatistic> statisticMap;
+
+    private Map<LocaleId, List<HProjectIteration>> missingLocaleVersionMap;
 
     private SortingType languageSortingList;
 
@@ -343,6 +349,67 @@ public class VersionGroupHomeAction implements Serializable {
         return versionGroupDAO.getMaintainerBySlug(getSlug());
     }
 
+    private Map<LocaleId, List<HProjectIteration>> getMissingLocaleVersionMap() {
+        if (missingLocaleVersionMap == null) {
+            missingLocaleVersionMap =
+                    versionGroupServiceImpl
+                            .getMissingLocaleVersionMap(getSlug());
+        }
+        return missingLocaleVersionMap;
+    }
+
+    /**
+     * Search for locale that is not activated in given version
+     *
+     * @param version
+     * @return
+     */
+    public List<LocaleId> getMissingLocale(HProjectIteration version) {
+        List<LocaleId> result = Lists.newArrayList();
+        for (Map.Entry<LocaleId, List<HProjectIteration>> entry : getMissingLocaleVersionMap()
+                .entrySet()) {
+            if (entry.getValue().contains(version)) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public String getMissingLocaleTitle(HProjectIteration version) {
+        int size = getMissingLocale(version).size();
+        if (size > 1) {
+            return zanataMessages.getMessage("jsf.LanguagesMissingProject",
+                    size);
+        }
+        return zanataMessages.getMessage("jsf.LanguageMissingProject", size);
+    }
+
+    /**
+     * Search for version that doesn't activate given locale
+     *
+     * @param localeId
+     * @return
+     */
+    public List<HProjectIteration> getMissingVersion(LocaleId localeId) {
+        return getMissingLocaleVersionMap().get(localeId);
+    }
+
+    public String getMissingVersionTitle(LocaleId localeId) {
+        int size = getMissingVersion(localeId).size();
+        if (size > 1) {
+            return zanataMessages.getMessage("jsf.ProjectsMissingLanguage",
+                    size);
+        }
+        return zanataMessages.getMessage("jsf.ProjectMissingLanguage", size);
+    }
+
+    public boolean isLocaleActivateInVersion(HProjectIteration version,
+            LocaleId localeId) {
+        List<HProjectIteration> versionList =
+                getMissingLocaleVersionMap().get(localeId);
+        return !versionList.contains(version);
+    }
+
     /**
      * Load up statistics for all project versions in all active locales in the
      * group.
@@ -354,7 +421,6 @@ public class VersionGroupHomeAction implements Serializable {
             statisticMap.putAll(groupStatisticServiceImpl.getLocaleStatistic(
                     getSlug(), locale.getLocaleId()));
         }
-
         WordStatistic overallWordStatistic = new WordStatistic();
         int totalWordCount = 0;
         for (Map.Entry<VersionLocaleKey, WordStatistic> entry : statisticMap

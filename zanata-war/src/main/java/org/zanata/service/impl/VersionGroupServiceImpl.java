@@ -22,19 +22,27 @@ package org.zanata.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.security.management.JpaIdentityStore;
+import org.zanata.common.LocaleId;
 import org.zanata.dao.ProjectIterationDAO;
 import org.zanata.dao.VersionGroupDAO;
 import org.zanata.model.HAccount;
 import org.zanata.model.HIterationGroup;
+import org.zanata.model.HLocale;
 import org.zanata.model.HPerson;
 import org.zanata.model.HProjectIteration;
 import org.zanata.service.VersionGroupService;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
@@ -168,6 +176,45 @@ public class VersionGroupServiceImpl implements VersionGroupService {
             }
         }
         return false;
+    }
+
+    /**
+     * Get the map of versions that doesn't contained all active locales of the
+     * group.
+     *
+     * @param groupSlug
+     * @return
+     */
+    @Override
+    public Map<LocaleId, List<HProjectIteration>> getMissingLocaleVersionMap(
+            String groupSlug) {
+        Map<LocaleId, List<HProjectIteration>> result = Maps.newHashMap();
+
+        HIterationGroup group = getBySlug(groupSlug);
+        if (group != null) {
+            for (HLocale activeLocale : group.getActiveLocales()) {
+                List<HProjectIteration> versionList = Lists.newArrayList();
+                for (HProjectIteration version : group.getProjectIterations()) {
+                    Set<HLocale> customisedLocales = Sets.newHashSet();
+
+                    // Fallback to project customised locale if version doesn't
+                    // overrides locales
+                    if (version.isOverrideLocales()) {
+                        customisedLocales = version.getCustomizedLocales();
+                    } else if (version.getProject().isOverrideLocales()) {
+                        customisedLocales =
+                                version.getProject().getCustomizedLocales();
+                    }
+
+                    if (!customisedLocales.isEmpty()
+                            && !customisedLocales.contains(activeLocale)) {
+                        versionList.add(version);
+                    }
+                }
+                result.put(activeLocale.getLocaleId(), versionList);
+            }
+        }
+        return result;
     }
 
 }

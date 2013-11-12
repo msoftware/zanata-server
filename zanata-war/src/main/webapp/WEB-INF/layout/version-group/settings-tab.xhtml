@@ -11,25 +11,29 @@
 <div class="tabs--vertical js-tabs">
 <ul class="tabs__nav js-tabs-nav">
   <li class="is-active">
-    <a href="#settings-general" id="settings-general_tab">
+    <a href="#settings-general" id="settings-general_tab"
+      title="#{messages['General']}">
       <i class="i i--settings"></i>
       <span class="is-hidden--m-down">#{messages['jsf.General']}</span>
     </a>
   </li>
   <li>
-    <a href="#settings-languages" id="settings-languages_tab">
+    <a href="#settings-languages" id="settings-languages_tab"
+      title="#{messages['Languages']}">
       <i class="i i--language"></i>
       <span class="is-hidden--m-down">#{messages['jsf.Languages']}</span>
     </a>
   </li>
   <li>
-    <a href="#settings-projects" id="settings-projects_tab">
+    <a href="#settings-projects" id="settings-projects_tab"
+      title="#{messages['Projects']}">
       <i class="i i--project"></i>
       <span class="is-hidden--m-down">#{messages['jsf.Projects']}</span>
     </a>
   </li>
   <li>
-    <a href="#settings-maintainers" id="settings-maintainers_tab">
+    <a href="#settings-maintainers" id="settings-maintainers_tab"
+      title="#{messages['Maintainers']}">
       <i class="i i--users"></i>
       <span class="is-hidden--m-down">#{messages['jsf.Maintainers']}</span>
     </a>
@@ -40,7 +44,7 @@
   <h2 class="l--push-all-0 gamma d--bottom">
     #{messages['jsf.General']}
   </h2>
-  <h:form id="general-settings-form" styleClass="l--push-bottom-0">
+  <h:form styleClass="l--push-bottom-0">
     <div class="l--constrain-medium">
       <ui:include src="edit_form.xhtml"/>
 
@@ -49,10 +53,35 @@
           action="#{versionGroupHome.update}"
           rendered="#{versionGroupHome.managed}"
           styleClass="l--push-right-half button--primary"/>
-        <s:button styleClass="button"
-          view="/version-group/version_group.xhtml"
-          value="#{messages['Cancel']}"/>
       </div>
+      <hr/>
+      <a4j:outputPanel id="status">
+        <p>
+          <a4j:commandLink styleClass="button--danger"
+            action="#{versionGroupHome.setStatus('O')}" render="status"
+            rendered="#{versionGroupHome.instance.status == 'ACTIVE'}">
+            #{messages['jsf.ArchiveThisGroup']}
+          </a4j:commandLink>
+
+          <a4j:commandLink styleClass="button--success"
+            action="#{versionGroupHome.setStatus('A')}" render="status"
+            rendered="#{versionGroupHome.instance.status != 'ACTIVE'}">
+            #{messages['jsf.ActivateThisGroup']}
+          </a4j:commandLink>
+        </p>
+
+        <p class="txt--meta">
+          <a4j:outputPanel
+            rendered="#{versionGroupHome.instance.status == 'ACTIVE'}">
+            #{messages['jsf.ArchiveGroupMessage']}
+          </a4j:outputPanel>
+
+          <a4j:outputPanel
+            rendered="#{versionGroupHome.instance.status != 'ACTIVE'}">
+            #{messages['jsf.ActivateGroupMessage']}
+          </a4j:outputPanel>
+        </p>
+      </a4j:outputPanel>
     </div>
   </h:form>
 </li>
@@ -84,7 +113,7 @@
           <div class="g__item w--7-10">
             <s:decorate template="../field.xhtml" enclose="true"
               id="newLanguageField">
-              <rich:autocomplete mode="client" var="suggestLocale"
+              <rich:autocomplete mode="ajax" var="suggestLocale"
                 minChars="2"
                 styleClass="auto-complete" id="newLanguage"
                 autocompleteMethod="#{versionGroupHome.suggestLocales}"
@@ -94,8 +123,9 @@
                 <a4j:ajax event="change"
                   listener="#{versionGroupHome.validateLanguageName(component.id)}"
                   execute="@this" render="newLanguageField"/>
-                <h:outputText
-                  value="#{suggestLocale.localeId} - #{suggestLocale.retrieveDisplayName()}"/>
+
+                #{suggestLocale.retrieveDisplayName()} <span
+                class="txt--meta">[#{suggestLocale.localeId}]</span>
               </rich:autocomplete>
             </s:decorate>
           </div>
@@ -129,8 +159,7 @@
           <s:link view="/iteration/view.xhtml">
             <f:param name="projectSlug" value="#{version.project.slug}"/>
             <f:param name="iterationSlug" value="#{version.slug}"/>
-            <i class="i i--version"></i> #{version.slug} <i
-            class="i i--document"></i> #{version.documents.size}
+            <i class="i i--version"></i> #{version.slug}
           </s:link>
           <a4j:commandLink
             action="#{versionGroupHome.removeVersion(version)}"
@@ -162,8 +191,8 @@
                 <a4j:ajax event="change"
                   listener="#{versionGroupHome.validateVersion(component.id)}"
                   execute="@this" render="newVersionField"/>
-                <h:outputText
-                  value="#{suggestVersion.project.name} - #{suggestVersion.slug}"/>
+                #{suggestVersion.project.name} <i
+                class="i i--version"></i> #{suggestVersion.slug}
               </rich:autocomplete>
             </s:decorate>
           </div>
@@ -225,7 +254,6 @@
                 <a4j:ajax event="change"
                   listener="#{versionGroupHome.validateMaintainer(component.id)}"
                   execute="@this" render="newMaintainerField"/>
-
                   <span class="w--r-1 bx--round l--push-right-quarter">
                     <img
                       src="#{gravatarServiceImpl.getUserImageUrl(48, suggestMaintainer.email)}"

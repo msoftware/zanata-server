@@ -195,6 +195,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 localeServiceImpl.getByLocaleId(new LocaleId(newLanguage));
         getInstance().getActiveLocales().add(locale);
         super.update();
+        this.newLanguage = "";
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.LanguageAddedToGroup",
                         locale.retrieveDisplayName()));
@@ -211,7 +212,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
                 projectIterationDAO.getBySlug(slugs[0], slugs[1]);
         getInstance().getProjectIterations().add(version);
         super.update();
-
+        this.newVersion = "";
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.VersionAddedToGroup",
                         version.getSlug()));
@@ -225,6 +226,7 @@ public class VersionGroupHome extends SlugHome<HIterationGroup> {
         HPerson maintainer = personDAO.findByUsername(newMaintainer);
         getInstance().getMaintainers().add(maintainer);
         super.update();
+        this.newMaintainer = "";
 
         FacesMessages.instance().add(
                 zanataMessages.getMessage("jsf.MaintainerAddedToGroup",

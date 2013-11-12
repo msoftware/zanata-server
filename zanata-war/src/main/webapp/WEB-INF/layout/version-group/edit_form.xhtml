@@ -17,6 +17,7 @@
         value="#{versionGroupHome.instance.slug}"
         valueChangeListener="#{versionGroupHome.verifySlugAvailable}">
         <a4j:ajax event="blur" render="slugField" execute="@this"/>
+        <f:validateLength minimum="1" maximum="40"/>
       </h:inputText>
     </s:decorate>
   </div>
@@ -28,6 +29,7 @@
       <h:inputText id="name" required="true"
         value="#{versionGroupHome.instance.name}">
         <a4j:ajax event="blur" render="nameField" execute="@this"/>
+        <f:validateLength maximum="80"/>
       </h:inputText>
     </s:decorate>
   </div>
@@ -38,22 +40,9 @@
     </h:outputLabel>
     <s:decorate id="descriptionField" template="../field.xhtml">
       <h:inputTextarea id="description" required="false"
-        value="#{versionGroupHome.instance.description}"/>
+        value="#{versionGroupHome.instance.description}">
+        <f:validateLength maximum="100"/>
+      </h:inputTextarea>
     </s:decorate>
   </div>
-
-  <a4j:outputPanel id="status">
-    <a4j:commandLink styleClass="txt--warning"
-      action="#{versionGroupHome.setStatus('O')}" render="status"
-      rendered="#{versionGroupHome.instance.status == 'ACTIVE'}">
-      #{messages['jsf.ArchiveThisGroup']}
-    </a4j:commandLink>
-
-    <a4j:commandLink styleClass="txt--warning"
-      action="#{versionGroupHome.setStatus('A')}" render="status"
-      rendered="#{versionGroupHome.instance.status != 'ACTIVE'}">
-      #{messages['jsf.ActivateThisGroup']}
-    </a4j:commandLink>
-  </a4j:outputPanel>
-
 </s:fragment>

@@ -123,6 +123,10 @@ public class VersionGroupJoinAction implements Serializable {
         }
     }
 
+    public String getGroupName() {
+        return versionGroupServiceImpl.getBySlug(slug).getName();
+    }
+
     public void searchProjectVersion() {
         if (StringUtils.isNotEmpty(iterationSlug)
                 && StringUtils.isNotEmpty(projectSlug)) {
